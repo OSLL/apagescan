@@ -25,7 +25,7 @@ def draw_hblocks_line(context, start_point, length, width_in_blocks=1):
     """
     Function draws horizontal line using blocks (size of <block_size> pixels)
     :param context: cairo context
-    :param start_point: tart coordinates on context to start drawing from
+    :param start_point: start coordinates on context to start drawing from
     :param length: length of line in pixels
     :param width_in_blocks: width of a line counted in <block_size>
     :return: None
@@ -36,21 +36,20 @@ def draw_hblocks_line(context, start_point, length, width_in_blocks=1):
     context.fill()
 
 
-def draw_addr_area(context_data, area_len, regions_map, pid_color_map, start_coords=(0, 0), start_pfn=0):
+def draw_addr_area(context_data, area_len, regions_map, pid_color_map, start_point=(0, 0), start_pfn=0):
     """
     Function draws processes' pages, combining them in blocks (size of <block_size> pixels) of different colors related to the process
     :param context_data: contains tuple (cairo context, context width, context height)
     :param area_len: length in bytes of memory part the is being displayed
     :param regions_map: tree of intervals (start_phys_index, end_phys_index, pid) that maps areas of pages in memory to processes
-    :param pid_color_map: dict {pid (int) : color (QColor)} that maps pid to its color for drawing
-    :param start_coords: start coordinates on context to start drawing from
+    :param pid_color_map: map of pids to colors for drawing
+    :param start_point: start coordinates on context to start drawing from
     :param start_pfn: index of page in physical memory to start counting from
     :return: None
     """
-    print(type(pid_color_map.keys()[0]))
     context, width, height = context_data
 
-    x, y = start_coords
+    x, y = start_point
     pfn = start_pfn
 
     pid_counter = Counter()
