@@ -1,7 +1,6 @@
 from collections import Counter
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPixmap, QPainter, QBrush
+from cairo import ImageSurface, Context, Format
 
 from utilities import create_regions_map
 
@@ -11,27 +10,54 @@ PAGE_SIZE = 4096
 block_size = 10  # pixel size
 pages_in_block = 64
 
+"""
+    Page size = 4096, i assumed 64 pages in block.
+    RAM size in our case = 2**31, so it gives
+    2**31 / (64 * 4096) = 2**31 / 2**18 = 2**13 blocks,
+    by splitting 2**13 into 2**7 and 2**6,
+    we get 128 x 64 blocks RAM visualization,
+    each block containing 64 pages    
+    same for SWAP, resulting in 80x1 blocks
+"""
 
-def draw_hblocks_line(pixmap, start_point, length, width=1):
-    painter = QPainter(pixmap)
-    painter.setBrush(Qt.black)
+
+def draw_hblocks_line(context, start_point, length, width_in_blocks=1):
+    """
+    Function draws horizontal line using blocks (size of <block_size> pixels)
+    :param context: cairo context
+    :param start_point: tart coordinates on context to start drawing from
+    :param length: length of line in pixels
+    :param width_in_blocks: width of a line counted in <block_size>
+    :return: None
+    """
     start_x, start_y = start_point
-    painter.drawRect(start_x, start_y, length, block_size * width - 1)
-    painter.end()
+    context.rectangle(start_x, start_y, length, block_size * width_in_blocks - 1)
+    context.set_source_rgb(0, 0, 0)
+    context.fill()
 
 
-def draw_addr_area(pixmap, area_len, start_pfn, start_coords, regions, pid_color_map):
-    painter = QPainter(pixmap)
+def draw_addr_area(context_data, area_len, regions_map, pid_color_map, start_coords=(0, 0), start_pfn=0):
+    """
+    Function draws processes' pages, combining them in blocks (size of <block_size> pixels) of different colors related to the process
+    :param context_data: contains tuple (cairo context, context width, context height)
+    :param area_len: length in bytes of memory part the is being displayed
+    :param regions_map: tree of intervals (start_phys_index, end_phys_index, pid) that maps areas of pages in memory to processes
+    :param pid_color_map: dict {pid (int) : color (QColor)} that maps pid to its color for drawing
+    :param start_coords: start coordinates on context to start drawing from
+    :param start_pfn: index of page in physical memory to start counting from
+    :return: None
+    """
+    print(type(pid_color_map.keys()[0]))
+    context, width, height = context_data
 
     x, y = start_coords
     pfn = start_pfn
-    width, height = pixmap.width(), pixmap.height()
 
     pid_counter = Counter()
     pages_count = area_len // PAGE_SIZE
 
     while pfn < pages_count:
-        intervals = regions[pfn:pfn + pages_in_block]
+        intervals = regions_map[pfn:pfn + pages_in_block]
 
         for interval in intervals:
             pid_counter[interval.data] += 1
@@ -42,7 +68,9 @@ def draw_addr_area(pixmap, area_len, start_pfn, start_coords, regions, pid_color
             if most_counted_pid:
                 pid = most_counted_pid[0][0]
                 color = pid_color_map[pid]
-                painter.fillRect(x, y, block_size, block_size, QBrush(color))
+                context.rectangle(x, y, block_size, block_size)
+                context.set_source_rgb(color.redF(), color.greenF(), color.blueF())
+                context.fill()
 
             if x + block_size >= width - 1:
                 y += block_size
@@ -53,19 +81,14 @@ def draw_addr_area(pixmap, area_len, start_pfn, start_coords, regions, pid_color
 
         pfn += pages_in_block
 
-    painter.end()
-
 
 def plot_pids_pagemap(page_data, colors_list, iteration):
     """
-        Page size = 4096, i assumed 64 pages in block.
-        RAM size in our case = 2**31, so it gives
-        2**31 / (64 * 4096) = 2**31 / 2**18 = 2**13 blocks,
-        by splitting 2**13 into 2**7 and 2**6,
-        we get 128 x 64 blocks RAM visualization,
-        each block containing 64 pages
-
-        same for SWAP, resulting in 80x1 blocks
+    Main function, creates an image of visual representation of device physical memory
+    :param page_data: page data divided into present and swapped parts, containing info for each page of a group of processes
+    :param colors_list: list of colors (QColor), so every process can be marked by unique color
+    :param iteration: number of current iteration
+    :return: None
     """
     ram_width, ram_height = 128, 64
     swap_width, swap_height = 80, 1
@@ -77,11 +100,26 @@ def plot_pids_pagemap(page_data, colors_list, iteration):
 
     pid_color_map = dict(zip(page_data[0].keys(), colors_list))
 
-    pixmap = QPixmap(pix_width, pix_height)
-    pixmap.fill(Qt.white)
+    surface = ImageSurface(Format.RGB24, pix_width, pix_height)
 
-    draw_addr_area(pixmap, RAM_SIZE, 0, (0, 0), present_regions, pid_color_map)
-    draw_hblocks_line(pixmap, (0, ram_height * block_size), pix_width)
-    draw_addr_area(pixmap, SWAP_SIZE, 0, (0, (ram_height + 1) * block_size), swapped_regions, pid_color_map)
+    context = Context(surface)
+    context.scale(1, 1)
 
-    pixmap.save(f'resources/data/pictures/offsets/p{iteration}.png')
+    context.save()
+    context.set_source_rgba(1., 1., 1., 1.)
+    context.paint()
+    context.restore()
+
+    draw_addr_area((context, pix_width, pix_height),
+                   RAM_SIZE,
+                   present_regions,
+                   pid_color_map)
+    draw_hblocks_line(context, (0, ram_height * block_size), pix_width)
+    draw_addr_area((context, pix_width, pix_height),
+                   SWAP_SIZE,
+                   swapped_regions,
+                   pid_color_map,
+                   (0, (ram_height + 1) * block_size))
+
+    surface.write_to_png(f'resources/data/pictures/offsets/p{iteration}.png')
+    surface.finish()
