@@ -24,7 +24,12 @@ from utilities import *
 
 
 class MainView(QMainWindow, Listener):
+    """MainView class: contains implementation of main window of application
+    """
+
     def __init__(self):
+        """Constructor method
+        """
         super().__init__()
         self._ui = Ui_MainWindow()
         self._ui.setupUi(self)
@@ -74,6 +79,8 @@ class MainView(QMainWindow, Listener):
         self.is_data_collected = False
 
     def call_menu(self, point):
+        """Calls context menu for a chosen pid in a table
+        """
         if self.active_state == -1:
             return
         menu = QtWidgets.QMenu()
@@ -88,6 +95,8 @@ class MainView(QMainWindow, Listener):
         self._ui.devicesButton.clicked.emit()
 
     def update_data(self):
+        """This method is called once in a short period of time to update data such as pid list from a device
+        """
         self.device_interaction.clear()
 
         if not self.devices_handler.device_selected():
@@ -114,6 +123,8 @@ class MainView(QMainWindow, Listener):
             self.set_table_color(i)
 
     def display_page_data(self):
+        """Plots collected data to frame
+        """
         try:
             iterations = self.device_interaction.get_iterations()
             if iterations is not None:
@@ -126,6 +137,8 @@ class MainView(QMainWindow, Listener):
             clean_tmp_data(remove_pictures_data=False, remove_pids_data=False)
 
     def refresh_colors(self):
+        """Generates new colors for pids on a plot
+        """
         self.generate_pid_colors()
         self.display_page_data()
         self.show_state(self.active_state)
@@ -199,6 +212,8 @@ class MainView(QMainWindow, Listener):
 
     @pyqtSlot()
     def dataButton_clicked(self):
+        """Runs scripts on a device, pulls data to application, plots and shows grapcs
+        """
         if not self.devices_handler.device_selected():
             self.show_msg('Error', 'No attached devices')
             return
@@ -266,6 +281,10 @@ class MainView(QMainWindow, Listener):
         self.is_data_collected = True
 
     def plot_page_data(self, iteration):
+        """Plots graphics of a given iteration
+
+        :param iteration: number of iteration of data collecting
+        """
         color_list = []
         highlighted_pids_list = []
 
@@ -283,6 +302,8 @@ class MainView(QMainWindow, Listener):
 
     @pyqtSlot()
     def playButton_clicked(self):
+        """Shows graphics of all iterations with a small interval
+        """
         self.active_state = 0
         for i in range(self.device_interaction.get_iterations()):  # simple implementation using sleep
             self._ui.nextButton.clicked.emit()
@@ -294,12 +315,16 @@ class MainView(QMainWindow, Listener):
 
     @pyqtSlot()
     def prevButton_clicked(self):
+        """Shows previous iteration
+        """
         if self.active_state > 0:
             self.active_state -= 1
             self.show_state(self.active_state)
 
     @pyqtSlot()
     def nextButton_clicked(self):
+        """Shows next iteration
+        """
         if self.active_state < self.device_interaction.get_iterations() - 1:
             self.active_state += 1
             self.show_state(self.active_state)
@@ -327,6 +352,8 @@ class MainView(QMainWindow, Listener):
 
     @pyqtSlot()
     def pidsButton_clicked(self):
+        """Opens menu for selecting pids for further analysis
+        """
         pids_dialog = SelectDialog(self.device_interaction.get_all_pid_list(),
                                    label='Select pids',
                                    parent=self)
@@ -336,6 +363,8 @@ class MainView(QMainWindow, Listener):
 
     @pyqtSlot()
     def devicesButton_clicked(self):
+        """Opens menu for selecting working device
+        """
         devices_dialog = SelectDialog(self.devices_handler.devices_list(),
                                       label='Select devices',
                                       close_on_detach=False,
@@ -347,6 +376,8 @@ class MainView(QMainWindow, Listener):
 
     @pyqtSlot()
     def show_pid_info(self):
+        """Shows full information about pid
+        """
         i = self._ui.tableWidget.selectedIndexes()[0].row()
         pid = self.active_pids[i]['pid']
         if self.active_pids[i]['corrupted']:
@@ -360,6 +391,8 @@ class MainView(QMainWindow, Listener):
             self.show_msg('Message', 'Data hasn\'t been collected yet')
 
     def show_CGroup_tree(self):
+        """Shows tree of processes in cgroup
+        """
         tree_dialog = TreeDialog(self.device_interaction.get_cgroups_list())
         transfer_data_facade = TreeDialogFacade(self.device_interaction, tree_dialog)
         self.signals.cgroup_changed.connect(tree_dialog.update)
@@ -391,13 +424,18 @@ class MainView(QMainWindow, Listener):
         self.display_page_data()
         self.show_state(self.active_state)
 
-    # edit alpha component for every picture for given index of pid
     def edit_alpha(self, pid_table_index, alpha):
+        """Edit alpha component of a pid
+
+        :param pid_table_index: pid's index in table
+        :param alpha: alpha components, lower alpha make pid's pages less bright on a plot
+        """
         self.active_pids[pid_table_index]['color'].setAlpha(alpha)
         self.set_table_color(pid_table_index)
 
-    # set color components according to table
     def set_table_color(self, pid_table_index):
+        """Set color components according to pids table
+        """
         for j in range(2):
             self._ui.tableWidget.item(pid_table_index, j).setBackground(QBrush(self.active_pids[pid_table_index]['color']))
         if self.active_pids[pid_table_index]['corrupted']:
@@ -405,6 +443,8 @@ class MainView(QMainWindow, Listener):
             self._ui.tableWidget.item(pid_table_index, 0).setFlags(QtCore.Qt.ItemIsEnabled)
 
     def highlight_pids(self):
+        """Highlihgt pids on a plot
+        """
         for index in range(self.len_active_pids):
             if self._ui.tableWidget.item(index, 0).checkState() == Qt.Unchecked:
                 self.active_pids[index]['highlighted'] = False

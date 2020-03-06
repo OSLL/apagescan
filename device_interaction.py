@@ -1,3 +1,5 @@
+"""Contains functions to work with connected android device and DeviceInteraction class"""
+
 import re
 import struct
 import subprocess
@@ -14,6 +16,11 @@ def get_bit(data, shift):
 
 
 def exec_command(*args, print_output=False):
+    """Execute command using subprocess module
+
+    :param args: arguments of a command to be executed
+    :param print_output: true is output has to be printed, false if not
+    """
     exec_str = ' '.join(args)
     output = subprocess.check_output(exec_str, shell=True)
     if print_output:
@@ -22,6 +29,8 @@ def exec_command(*args, print_output=False):
 
 
 def read_page_data(pid):
+    """Read pages of a given pid
+    """
     # The number of bytes for offset (address) and flags in binary file
     offset_size = 8
     flags_size = 4
@@ -52,7 +61,8 @@ def read_page_data(pid):
 
 
 def adb_cgroups_list(device):
-    # Read /proc/mounts - file with all mount points
+    """Get control groups list from device
+    """
     try:
         raw_data = str(exec_command(f'adb -s {device}', 'shell', 'cat', '/proc/mounts'))
     except CalledProcessError:
@@ -61,7 +71,8 @@ def adb_cgroups_list(device):
 
 
 def adb_collect_pid_list(device, tool, filename, pull_path, group):
-    # collect pid list on device
+    """Collect pid list from device
+    """
     exec_command(f'adb -s {device}',
                  'shell',
                  f'/data/local/testing/{tool}',
@@ -77,6 +88,11 @@ def adb_collect_pid_list(device, tool, filename, pull_path, group):
 
 
 def adb_collect_page_data(device, pid_list):
+    """Collect information about memory pages
+
+    :param device: target device
+    :param pid_list: list of processes to be examined
+    """
     page_data = OrderedDict()
     swapped_data = OrderedDict()
     present_data = OrderedDict()
@@ -111,6 +127,8 @@ def adb_collect_page_data(device, pid_list):
 
 
 class DeviceInteraction:
+    """Class to communicate with android device
+    """
     def __init__(self):
         self.device = None
         self.page_data = {}
@@ -143,6 +161,8 @@ class DeviceInteraction:
         return self.iterations
 
     def set_device(self, device):
+        """Sets working device
+        """
         self.device = device
 
     def clear(self):
@@ -159,9 +179,13 @@ class DeviceInteraction:
             self.swapped_page_data.setdefault(i, OrderedDict())
 
     def adb_collect_cgroups_list(self):
+        """Collects list of cgroups from a device
+        """
         self.cgroups_list = adb_cgroups_list(self.device)
 
     def adb_collect_all_pid_list(self):
+        """Get all processes running on a device
+        """
         try:
             self.all_pid_list = adb_collect_pid_list(self.device,
                                                      tool='get_pid_list',
@@ -173,6 +197,10 @@ class DeviceInteraction:
             raise
 
     def adb_collect_cgroup_pid_list(self, group=''):
+        """Collects pids from a given cgroup
+
+        :param group: cgroup name
+        """
         try:
             self.cgroup_pid_list = adb_collect_pid_list(self.device,
                                                         tool='read_cgroup',
@@ -184,6 +212,11 @@ class DeviceInteraction:
             raise
 
     def adb_collect_page_data(self, cur_iteration, pid_list):
+        """Collects information about memory pages
+
+        :param cur_iteration: iteration of collecting
+        :param pid_list: list of pids to collect data from
+        """
         page_data, present_data, swapped_data, error_pids = adb_collect_page_data(self.device, pid_list)
         self.page_data[cur_iteration] = page_data
         self.present_page_data[cur_iteration] = present_data
