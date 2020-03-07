@@ -4,6 +4,12 @@ from matplotlib.figure import Figure
 
 
 def barplot_pids_pagemap(page_data, highlighted_pids, index=''):
+    """plots bar graphics of a given iteration
+
+    :param page_data: list of data that displays
+    :param highlighted_pids: list of data that has to be highlighted
+    :param index: number of iteration of data collecting
+    """
     # TODO Remove hardcoded values, use values depending on widget size
     width = 13
     height = 2
@@ -46,12 +52,23 @@ def barplot_pids_pagemap(page_data, highlighted_pids, index=''):
 
 
 def get_flags_count(data, column):
+    """gets the dictionary of unique data and its count
+
+    :param data: list of data
+    :param column: number of unique data occurring in the data list
+    """
     unique, counts = np.unique(data[column], return_counts=True)
     return dict(zip(unique, counts))
 
 
 #  []_flag - dict like {0: number of 0, 1: number of 1}
 def get_percentage_values(total_pages, present_flag, any_flag):
+    """gets the list of values in percent
+
+    :param total_pages: the total number of pages
+    :param present_flag: number of pages that have present and swapped flags
+    :param any_flag: number of pages that have present and any flags
+    """
     flags_count_data = [present_flag.get(0, 0),  # swapped
                         present_flag.get(1, 0) - any_flag.get(1, 0),  # present - any
                         any_flag.get(1, 0)]
@@ -59,5 +76,12 @@ def get_percentage_values(total_pages, present_flag, any_flag):
 
 
 def plot_bar(ax, bar_data, y_offset, colors):
+    """displays bar graphics
+
+    :param ax: axes instance in the coordinate system
+    :param bar_data: list of data that displays
+    :param y_offset: offset in y axes in the coordinate system
+    :param colors: color list
+    """
     for i, bar_value in enumerate(bar_data):
         ax.barh(y=y_offset, width=bar_value, left=sum(bar_data[:i]), color=colors[i])

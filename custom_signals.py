@@ -2,6 +2,8 @@ from PyQt5.QtCore import QObject, pyqtSignal
 
 
 class CustomSignals(QObject):
+    """CustomSignals class: creates signals
+    """
     pids_changed = pyqtSignal(list)
     cgroup_changed = pyqtSignal(list)
     devices_changed = pyqtSignal(list)
