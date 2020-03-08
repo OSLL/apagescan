@@ -62,12 +62,10 @@ def clean_tmp_data(remove_page_data=True, remove_pictures_data=True, remove_pids
 
 
 def create_regions_map(page_data={}):
-    """
-        Function creates map of processes regions in RAM
-        Region means continuous block of pages,
-        represented like (start_pfn, end_pfn, pid)
-        Regions inserted into tree, to search
-        which regions contain particular page by given pfn
+    """Creates tree of processes regions in RAM
+
+    :param page_data: data about each page for each inspected process
+    :return: tree of regions represented as (start_pfn, end_pfn, pid)
     """
     regions = IntervalTree()
     for pid, data in page_data.items():

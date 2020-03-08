@@ -11,19 +11,19 @@ block_size = 10  # pixel size
 pages_in_block = 64
 
 """
-    Page size = 4096, i assumed 64 pages in block.
-    RAM size in our case = 2**31, so it gives
-    2**31 / (64 * 4096) = 2**31 / 2**18 = 2**13 blocks,
-    by splitting 2**13 into 2**7 and 2**6,
-    we get 128 x 64 blocks RAM visualization,
-    each block containing 64 pages    
-    same for SWAP, resulting in 80x1 blocks
+Page size = 4096, i assumed 64 pages in block.
+RAM size in our case = 2**31, so it gives
+2**31 / (64 * 4096) = 2**31 / 2**18 = 2**13 blocks,
+by splitting 2**13 into 2**7 and 2**6,
+we get 128 x 64 blocks RAM visualization,
+each block containing 64 pages    
+same for SWAP, resulting in 80x1 blocks
 """
 
 
 def draw_hblocks_line(context, start_point, length, width_in_blocks=1):
-    """
-    Function draws horizontal line using blocks (size of <block_size> pixels)
+    """Draws horizontal line using blocks (size of <block_size> pixels)
+
     :param context: cairo context
     :param start_point: start coordinates on context to start drawing from
     :param length: length of line in pixels
@@ -37,8 +37,8 @@ def draw_hblocks_line(context, start_point, length, width_in_blocks=1):
 
 
 def draw_addr_area(context_data, area_len, regions_map, pid_color_map, start_point=(0, 0), start_pfn=0):
-    """
-    Function draws processes' pages, combining them in blocks (size of <block_size> pixels) of different colors related to the process
+    """Draws processes' pages, combining them in blocks (size of <block_size> pixels) of different colors related to the process
+
     :param context_data: contains tuple (cairo context, context width, context height)
     :param area_len: length in bytes of memory part the is being displayed
     :param regions_map: tree of intervals (start_phys_index, end_phys_index, pid) that maps areas of pages in memory to processes
@@ -82,8 +82,8 @@ def draw_addr_area(context_data, area_len, regions_map, pid_color_map, start_poi
 
 
 def plot_pids_pagemap(page_data, colors_list, iteration):
-    """
-    Main function, creates an image of visual representation of device physical memory
+    """Creates an image of visual representation of device physical memory
+
     :param page_data: page data divided into present and swapped parts, containing info for each page of a group of processes
     :param colors_list: list of colors (QColor), so every process can be marked by unique color
     :param iteration: number of current iteration
