@@ -2,6 +2,7 @@
 ### Welcome to our project! 
 
 [Operating System Laboratory](http://project2043696.tilda.ws/page9393990.html) introduce a new tool - _apagescan_ for virtual memory page tracking.
+
 _apagescan_ maintain:
 
 1. Graphical user-friendly interface
@@ -76,8 +77,24 @@ Open terminal and follow these steps:
 1. Run the `apagescan`
 
 ### Example usage
+1. Choose PIDs  
 
-TBD
+
+![image](https://user-images.githubusercontent.com/29632527/76162701-4d93d280-6151-11ea-8429-bdb561c6e88c.png)  
+
+
+2. Push `Collect Data` button and set time-interval: 10-sec. experiment with 0 sec. delay between data collection  
+
+
+![image](https://user-images.githubusercontent.com/29632527/76162795-d448af80-6151-11ea-816f-79a32a7c0628.png)  
+
+
+3. Watch the result  
+
+
+![image](https://user-images.githubusercontent.com/29632527/76162822-0d811f80-6152-11ea-8ddc-ffd2ed9f8420.png)
+
+
 
 **_NOTE_**: The full interface description you can find on [Wiki](https://github.com/OSLL/apagescan/wiki/Interface-guide)
 
