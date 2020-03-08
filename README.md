@@ -1,7 +1,8 @@
 # _apagescan_
 ### Welcome to our project! 
 
-[Operating System Laboratory](http://project2043696.tilda.ws/page9393990.html) introduce a new tool - _apagescan_ for virtual memory page tracking. _apagescan_ maintain:
+[Operating System Laboratory](http://project2043696.tilda.ws/page9393990.html) introduce a new tool - _apagescan_ for virtual memory page tracking.
+_apagescan_ maintain:
 
 1. Graphical user-friendly interface
 2. Display information page by page
@@ -9,21 +10,19 @@
 4. Selection of processes from cgroups
 5. Scanning zRAM 
 
-> TBD - link on publication - somewhere
-
 ## Table of contents
-* [Installation](#Installation)
+[Installation](#Installation)
 
-* [Usage](#Usage)
+[Usage](#Usage)
 
-* [Contributing](#Contributing)
+[Contributing](#Contributing)
 
 ## Installation
 
 ### Requirements
 
-*  [_adb_ - Android Debug Bridge](https://developer.android.com/studio/command-line/adb)
-*  gcc-arm
+* [Adb - Android Debug Bridge](https://developer.android.com/studio/command-line/adb)
+* Cross compiler to arm
 * Python 3.6+:
   * pip3
   * virtualenv
@@ -52,23 +51,28 @@ Open terminal and follow these steps:
     cd apagescan/
     ```
 
-3. > TBD add info how to compile and move .c files to device
+3. Connect your device (**must be rooted and unlocked**)
+
+    ```bash
+    cd tool/
+    make
+    ```
 
 4. Set up the environment and install tool:
 
     ```bash
+    cd ../
     ./setup.sh
     ```
 ## Usage
 
 ### Start
-Make sure that your **device is unlocked** and you have **root privileges**. 
-
-0. Connect your device and run in terminal:
+0. Connect your device and run in terminal (optional):
 
    ```bash
     adb root
    ```
+   
 1. Run the `apagescan`
 
 ### Example usage
