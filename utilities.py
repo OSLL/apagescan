@@ -62,7 +62,7 @@ def clean_tmp_data(remove_page_data=True, remove_pictures_data=True, remove_pids
 
 
 def create_regions_map(page_data={}):
-    """Creates tree of processes regions in RAM
+    """Creates tree of processes memory regions
 
     :param page_data: data about each page for each inspected process
     :return: tree of regions represented as (start_pfn, end_pfn, pid)
