@@ -8,11 +8,6 @@ class TableDialog(QDialog):
     """TableDialog class: dialog for displaying data in the table
     """
     def __init__(self, pid, pages_list):
-        """Constructor method
-
-        :param pid: process id
-        :param pages_list: list of data that further displaying
-        """
         super(TableDialog, self).__init__()
 
         self.pid = pid

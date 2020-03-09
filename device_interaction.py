@@ -1,4 +1,5 @@
-"""Contains functions to work with connected android device and DeviceInteraction class"""
+"""Contains functions to work with connected android device and DeviceInteraction class
+"""
 
 import re
 import struct
@@ -16,7 +17,7 @@ def get_bit(data, shift):
 
 
 def exec_command(*args, print_output=False):
-    """Execute command using subprocess module
+    """Executes command using subprocess module
 
     :param args: arguments of a command to be executed
     :param print_output: true is output has to be printed, false if not
@@ -29,7 +30,9 @@ def exec_command(*args, print_output=False):
 
 
 def read_page_data(pid):
-    """Read pages of a given pid
+    """Reads pages of a given pid
+
+    :param pid: pid
     """
     # The number of bytes for offset (address) and flags in binary file
     offset_size = 8
@@ -62,6 +65,8 @@ def read_page_data(pid):
 
 def adb_cgroups_list(device):
     """Get control groups list from device
+
+    :param device: device
     """
     try:
         raw_data = str(exec_command(f'adb -s {device}', 'shell', 'cat', '/proc/mounts'))
@@ -72,6 +77,12 @@ def adb_cgroups_list(device):
 
 def adb_collect_pid_list(device, tool, filename, pull_path, group):
     """Collect pid list from device
+
+    :param device: target device
+    :param tool: script name on android device
+    :param filename: data filename on android device
+    :param pull_path: path for data on PC
+    :param group: control group to collect pid list from
     """
     exec_command(f'adb -s {device}',
                  'shell',

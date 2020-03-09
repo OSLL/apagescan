@@ -1,5 +1,7 @@
 # this class does not inherit from model, it is just a node to be in a tree
 class PidNode(object):
+    """Class of a node for a treeView
+    """
 
     def __init__(self, pid=-1, parent=None):
         self.pid = pid

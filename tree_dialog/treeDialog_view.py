@@ -7,6 +7,8 @@ from qt_ui.treeDialog_ui import Ui_TreeDialog
 
 
 class TreeDialog(SelectDialog):
+    """TreeDialog: dialog to work with treeView
+    """
 
     def __init__(self, cgroup_list):
         self.cgroup_list = cgroup_list

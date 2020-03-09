@@ -10,8 +10,6 @@ class SelectDialog(DataDialog):
     """SelectDialog class: dialog for displaying and selecting data inherited from class DataDialog
     """
     def initUI(self):
-        """customizes the interface
-        """
         self._ui = Ui_SelectDialog()
         self._ui.setupUi(self)
         self._ui.label.setText(self.label)
@@ -28,8 +26,6 @@ class SelectDialog(DataDialog):
         self.set_data(self.data_list)
 
     def get_checked(self):
-        """gets a list of data that checked in the table widget
-        """
         checked_data = []
         try:
             for i in range(self.row):
@@ -40,13 +36,9 @@ class SelectDialog(DataDialog):
         return checked_data
 
     def button_clicked(self):
-        """the button clicked event that emits a signal
-        """
         self.signals.send_data.emit(self.get_checked())
 
     def select_all_button_clicked(self):
-        """sets a check state on all data in the table widget
-        """
         if self._ui.checkBox.checkState() == Qt.Checked:
             for i in range(self.row):
                 self._ui.tableWidget.item(i, 0).setCheckState(Qt.Checked)
@@ -55,10 +47,6 @@ class SelectDialog(DataDialog):
                 self._ui.tableWidget.item(i, 0).setCheckState(Qt.Unchecked)
 
     def set_data(self, new_data_list):
-        """displays data in table widgets
-
-        :param new_data_list: list of data that displays
-        """
         if len(new_data_list) == 0:
             self._ui.tableWidget.clear()
             return
@@ -80,16 +68,10 @@ class SelectDialog(DataDialog):
 
     @pyqtSlot(list)
     def update(self, new_data_list):
-        """ slot method that updates data in widgets
-
-        :param new_data_list: list of data that displays
-        """
         if len(new_data_list) == 0 and self.close_on_detach:
             self.done(0)
             return
         self.set_data(new_data_list)
 
     def hide_select_all_push_button(self):
-        """hides 'Select all' push button
-        """
         self._ui.checkBox.hide()

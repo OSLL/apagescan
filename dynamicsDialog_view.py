@@ -9,8 +9,6 @@ class DynamicsDialog(QDialog):
     """DynamicsDialog class: dialog for displaying data
     """
     def __init__(self):
-        """Constructor method
-        """
         super(DynamicsDialog, self).__init__()
         self._ui = Ui_DynamicsDialog()
         self._ui.setupUi(self)
@@ -33,8 +31,6 @@ class DynamicsDialog(QDialog):
         self._ui.totalTimeEdit.textChanged.emit(self._ui.totalTimeEdit.text())
 
     def get_values(self):
-        """gets the list of iteration time and total time
-        """
         iteration_time = float(self._ui.iterationTimeEdit.text())
         total_time = float(self._ui.totalTimeEdit.text())
         if iteration_time <= total_time:
@@ -43,13 +39,9 @@ class DynamicsDialog(QDialog):
             return []
 
     def button_clicked(self):
-        """the button clicked event that emits a signal
-        """
         self.signals.send_data.emit(self.get_values())
 
     def check_state(self):
-        """gets a state of data
-        """
         iteration_state = self.validator.validate(self._ui.iterationTimeEdit.text(), 0)[0]
         total_state = self.validator.validate(self._ui.totalTimeEdit.text(), 0)[0]
         if iteration_state == QtGui.QValidator.Acceptable and total_state == QtGui.QValidator.Acceptable:
@@ -58,15 +50,9 @@ class DynamicsDialog(QDialog):
             self._ui.buttonBox.setEnabled(False)
 
     def closeEvent(self, event):
-        """the close event that emits a signal
-
-        :param event: the close event
-        """
         self.signals.send_data.emit([])
         event.accept()
 
     def reject(self):
-        """closes the dialog
-        """
         self.close()
 

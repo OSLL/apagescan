@@ -91,11 +91,13 @@ class MainView(QMainWindow, Listener):
         menu.exec(self._ui.tableWidget.mapToGlobal(point))
 
     def show(self):
+        """Shows mainWindow
+        """
         super().show()
         self._ui.devicesButton.clicked.emit()
 
     def update_data(self):
-        """This method is called once in a short period of time to update data such as pid list from a device
+        """Updates data such as pid list from a device with a small time interval
         """
         self.device_interaction.clear()
 
@@ -114,6 +116,10 @@ class MainView(QMainWindow, Listener):
             clean_tmp_data(remove_page_data=False, remove_pictures_data=False)
 
     def generate_pid_colors(self, update_active_pids=True):
+        """Generates colors for pid's representation on a plot
+
+        :param update_active_pids: true if active pids colors has to be re-generated, false if not
+        """
         for i in range(self.len_active_pids):
             if self.active_pids[i]['corrupted']:
                 self.active_pids[i]['color'] = QColor(Qt.transparent)
@@ -144,6 +150,10 @@ class MainView(QMainWindow, Listener):
         self.show_state(self.active_state)
 
     def view_checked_pids(self, checked_pids):
+        """Handles checked pids for further actions
+
+        :param checked_pids: list of pids
+        """
         self._ui.tableWidget.clear()
         row = len(checked_pids)
         col = 2
@@ -178,6 +188,8 @@ class MainView(QMainWindow, Listener):
         self.is_data_collected = False
 
     def timerEvent(self):
+        """Calls update method with small time interval
+        """
         self.time = self.time.addSecs(1)
         self.timer.start(1000)
         self.devices_handler.update()
@@ -185,6 +197,11 @@ class MainView(QMainWindow, Listener):
             self.react()
 
     def show_msg(self, msg_type, msg):
+        """Shows custom message
+
+        :param msg_type: type of message to be shown
+        :param msg: text of message
+        """
         QGuiApplication.restoreOverrideCursor()
         QMessageBox.about(self, msg_type, msg)
 
@@ -205,6 +222,10 @@ class MainView(QMainWindow, Listener):
         self.signals.cgroup_changed.emit(self.device_interaction.get_cgroups_list())
 
     def show_state(self, state_index):
+        """Shows data state
+
+        :param state_index: index if a state to be shown
+        """
         self.pages_graph.set_item(QtGui.QPixmap(f'resources/data/pictures/offsets/p{state_index}.png'))
         self.pages_stats_graph.set_item(QtGui.QPixmap(f'resources/data/pictures/barplot/b{state_index}.png'))
         self.set_buttons(prev=(self.active_state > 0),
@@ -414,6 +435,8 @@ class MainView(QMainWindow, Listener):
             highlight if highlight is not None else self._ui.highlightButton.isEnabled())
 
     def change_pid_color(self):
+        """Changes color of a pid
+        """
         index = self._ui.tableWidget.selectedIndexes()[0].row()
         if self.active_pids[index]['corrupted']:
             return

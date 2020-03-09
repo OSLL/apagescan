@@ -10,14 +10,6 @@ class DataDialog(QDialog):
     """DataDialog class: prototype dialog for selecting data
     """
     def __init__(self, data_list, label='', close_on_detach=True, parent=None, header=[False, False]):
-        """Constructor method
-
-        :param data_list: list of data that further displaying and selecting
-        :param label: a label that indicates what data to enter
-        :param close_on_detach: true is dialog has to be closed on detach, false if not
-        :param parent: parent class
-        :param header: list of 2 elements: horizontal and vertical headers
-        """
         super(DataDialog, self).__init__(parent)
 
         self.data_list = data_list
@@ -30,8 +22,6 @@ class DataDialog(QDialog):
         self.close_on_detach = close_on_detach
 
     def initUI(self):
-        """customizes the interface
-        """
         self._ui = Ui_DataDialog()
         self._ui.setupUi(self)
         self._ui.label.setText(self.label)
@@ -49,15 +39,9 @@ class DataDialog(QDialog):
         self.set_data(self.data_list)
 
     def button_clicked(self):
-        """prototype function of the button clicked event
-        """
         self.done(0)
 
     def set_data(self, new_data_list):
-        """displays data in table widgets
-
-        :param new_data_list: list of data that displays
-        """
         if len(new_data_list) == 0:
             self._ui.tableWidget.clear()
             return
@@ -76,10 +60,6 @@ class DataDialog(QDialog):
 
     @pyqtSlot(list)
     def update(self, new_data_list):
-        """ slot method that updates data in widgets
-
-        :param new_data_list: list of data that displays
-        """
         if len(new_data_list) == 0 and self.close_on_detach:
             self.done(0)
             return

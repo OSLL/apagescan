@@ -8,6 +8,8 @@ from pandas.errors import EmptyDataError
 
 # facade class to handle transfer data between device and TreeDialog instance
 class TreeDialogFacade(QObject):
+    """Facade class to handle transfer data between device and treeDialog instance
+    """
     def __init__(self, device_interaction, tree_dialog):
         super().__init__()
         self.dialog = tree_dialog
