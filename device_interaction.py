@@ -13,6 +13,10 @@ from pandas.errors import EmptyDataError
 
 
 def get_bit(data, shift):
+    """Checks whether bit is 1 or 0
+
+    :param data: given number
+    :param shift: bit offset"""
     return (data >> shift) & 1
 
 
@@ -141,6 +145,8 @@ class DeviceInteraction:
     """Class to communicate with android device
     """
     def __init__(self):
+        """Constructor method
+        """
         self.device = None
         self.page_data = {}
         self.present_page_data = {}
@@ -152,15 +158,27 @@ class DeviceInteraction:
         self.iterations = None
 
     def get_all_pid_list(self):
+        """Returns list of all pids from device
+        """
         return self.all_pid_list
 
     def get_cgroup_pid_list(self):
+        """Returns list of all pids from cgroup
+        """
         return self.cgroup_pid_list
 
     def get_cgroups_list(self):
+        """Returns list of all cgroups
+        """
         return self.cgroups_list
 
     def get_page_data(self, iteration=None, present=False, swapped=False):
+        """Returns pages information
+
+        :param iteration: number of collecting iteration
+        :param present: True if present data is required, False if not
+        :param swapped: True if swapped data is required, False if not
+        """
         if not present and not swapped:
             return self.page_data if iteration is None else self.page_data.get(iteration)
         elif present:
@@ -169,6 +187,8 @@ class DeviceInteraction:
             return self.swapped_page_data if iteration is None else self.swapped_page_data.get(iteration)
 
     def get_iterations(self):
+        """Returns total amount of iterations
+        """
         return self.iterations
 
     def set_device(self, device):
@@ -177,12 +197,18 @@ class DeviceInteraction:
         self.device = device
 
     def clear(self):
+        """Removes collected data
+        """
         self.cgroup_pid_list = []
         self.all_pid_list = []
         self.cgroups_list = []
         self.error_pids = []
 
     def set_iterations(self, iterations):
+        """Sets total amount of iterations
+
+        :param iterations: amount to be set
+        """
         self.iterations = iterations
         for i in range(self.iterations):
             self.page_data.setdefault(i, OrderedDict())

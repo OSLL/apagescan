@@ -4,6 +4,8 @@ from PyQt5.QtWidgets import QGraphicsView
 
 
 class PhotoViewer(QGraphicsView):
+    """Class to view plotted graphs
+    """
     def __init__(self, need_zoom=False, parent=None):
         super(PhotoViewer, self).__init__(parent)
         self.scene = QtWidgets.QGraphicsScene(self)

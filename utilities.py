@@ -10,7 +10,8 @@ from device_interaction import exec_command
 
 
 def generate_color():
-    """Generates random color"""
+    """Generates random color
+    """
     red = int(random.randrange(0, 255))
     green = int(random.randrange(0, 255))
     blue = int(random.randrange(0, 255))
