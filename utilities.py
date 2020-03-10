@@ -21,9 +21,9 @@ def generate_color():
 
 
 def sleep(sec):
-    """Stops application
+    """Suspends (waits) execution of the app for a given number of seconds
 
-    :param sec: amount of seconds to sleep for
+    :param sec: number of seconds to sleep for
     """
     loop = QEventLoop()
     QTimer.singleShot(sec * 1000, loop.quit)
@@ -31,7 +31,7 @@ def sleep(sec):
 
 
 def clean_tmp_data_from_device(device, remove_page_data=True, remove_pids_data=True):
-    """Removes data from connected android device
+    """Removes collected pagedata from connected android device
 
     :param remove_page_data: true if page data has to be removed, false if not
     :param remove_pids_data: true if pids data has to be removed, false if not
@@ -49,7 +49,7 @@ def clean_tmp_data_from_device(device, remove_page_data=True, remove_pids_data=T
 
 
 def clean_tmp_data(remove_page_data=True, remove_pictures_data=True, remove_pids_data=True):
-    """Removes data from PC
+    """Removes collected from a device and transferred into app pagedata
 
     :param remove_page_data: true if page data has to be removed, false if not
     :param remove_pids_data: true if pids data has to be removed, false if not
