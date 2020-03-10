@@ -59,12 +59,13 @@ Open terminal and follow these steps:
     make
     ```
 
-4. Set up the environment and install tool:
+4. Set up the environment and create executable file:
 
     ```bash
     cd ../
     ./setup.sh
     ```
+    сreated executable file would be located in `/apagescan` folder
 ## Usage
 
 ### Start
