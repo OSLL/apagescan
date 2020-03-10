@@ -4,22 +4,24 @@ import numpy as np
 
 
 class DeviceHandler:
-    """Class to handle all android devices connected to PC
+    """
+    Class to handle Android devices, connected to PC
+    :ivar listeners: list of listeners - objects (implementing Listener interface), that are tracking devices' changes
+    :ivar serial_numbers: list of all connected devices' serial numbers
+    :ivar current_device: serial number of selected connected device
     """
     def __init__(self):
-        """Constructor method
-        """
         self.listeners = []
         self.serial_numbers = []
         self.current_device = None
 
     def device_selected(self):
-        """Return selected device
+        """Return True if current device is still selected (selection is being cancelled on disconnect), else False
         """
         return self.current_device in list(np.asarray(self.serial_numbers).flatten())
 
     def has_devices(self):
-        """Returns true if there are connected devices, false if not"""
+        """Returns True if there are connected devices, False if not"""
         return len(self.serial_numbers) != 0
 
     def get_device(self):
@@ -28,7 +30,7 @@ class DeviceHandler:
         return self.current_device if self.device_selected() else None
 
     def switch(self, number):
-        """Switches working device
+        """Switches working device to new device
 
         :param number: number of a new working device
         """
@@ -42,14 +44,14 @@ class DeviceHandler:
         return self.serial_numbers
 
     def add_listener(self, listener):
-        """Adds listener
+        """Adds new listener
 
         :param listener: listener to be added
         """
         self.listeners.append(listener)
 
     def update(self):
-        """Updates list of all connected devices
+        """Updates list of all connected devices and notifies listeners
         """
         res = subprocess.check_output(
             "adb devices",
