@@ -155,14 +155,13 @@ class DeviceInteraction:
     """
     Class for interaction with Android device and collection of device's running processes' pagedata
     :ivar device: serial number of connected android device
-    :ivar page_data: page by page data about processes, indexed with pid
-    :ivar present_page_data: data about processes' pages in memory (each process indexed with pid)
-    :ivar present_page_data: data about processes' present pages in memory (each process  indexed with pid)
-    :ivar swapped_page_data: data about processes' swapped pages in memory (each process  indexed with pid)
+    :ivar page_data: processes' memory pagedata
+    :ivar present_page_data: processes' present memory pagedata
+    :ivar swapped_page_data: processes' swapped memory pagedata
     :ivar error_pids: list of pids, for which data couldn't be collected
-    :ivar all_pid_list: list of all processes's pids running on connected device
-    :ivar cgroups_list: list connected device's available cgroups
-    :ivar cgroup_pid_list: list of processes's pids  in chosen cgroup, running on connected device
+    :ivar all_pid_list: list of all running processes' pids
+    :ivar cgroups_list: list of connected device's available cgroups
+    :ivar cgroup_pid_list: list of processes' pids  in chosen cgroup, running on connected device
     :ivar iterations: number of iterations of data collecting
     """
     def __init__(self):
