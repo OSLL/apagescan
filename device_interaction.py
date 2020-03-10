@@ -1,4 +1,14 @@
 """Contains functions to work with connected android device and DeviceInteraction class
+
+Functions provide interface to interact with connected Android device and collect
+page by page memory data about processes running on a device. DeviceInteraction class
+combines these functions along with convenient storage of collected data
+
+Usage example:
+    connection = DeviceInteraction()
+    connection.set_device("04322b6c2208c98b")
+    connection.adb_collect_all_pid_list()
+    pid_list = connection.get_all_pid_list()
 """
 
 import re
@@ -142,11 +152,20 @@ def adb_collect_page_data(device, pid_list):
 
 
 class DeviceInteraction:
-    """Class to communicate with android device
+    """
+    Class for interaction with Android device and collection of device's running processes' pagedata
+    :ivar device: serial number of connected android device
+    :ivar page_data: page by page data about processes, indexed with pid
+    :ivar present_page_data: data about processes' pages in memory (each process indexed with pid)
+    :ivar present_page_data: data about processes' present pages in memory (each process  indexed with pid)
+    :ivar swapped_page_data: data about processes' swapped pages in memory (each process  indexed with pid)
+    :ivar error_pids: list of pids, for which data couldn't be collected
+    :ivar all_pid_list: list of all processes's pids running on connected device
+    :ivar cgroups_list: list connected device's available cgroups
+    :ivar cgroup_pid_list: list of processes's pids  in chosen cgroup, running on connected device
+    :ivar iterations: number of iterations of data collecting
     """
     def __init__(self):
-        """Constructor method
-        """
         self.device = None
         self.page_data = {}
         self.present_page_data = {}
@@ -192,7 +211,9 @@ class DeviceInteraction:
         return self.iterations
 
     def set_device(self, device):
-        """Sets working device
+        """Sets working device to get data
+
+        :param device: device serial number
         """
         self.device = device
 
@@ -205,7 +226,7 @@ class DeviceInteraction:
         self.error_pids = []
 
     def set_iterations(self, iterations):
-        """Sets total amount of iterations
+        """Sets total amount of iterations and initializes page_data structures
 
         :param iterations: amount to be set
         """
@@ -216,12 +237,12 @@ class DeviceInteraction:
             self.swapped_page_data.setdefault(i, OrderedDict())
 
     def adb_collect_cgroups_list(self):
-        """Collects list of cgroups from a device
+        """Collects list of available cgroups from a device
         """
         self.cgroups_list = adb_cgroups_list(self.device)
 
     def adb_collect_all_pid_list(self):
-        """Get all processes running on a device
+        """Collects list of all processes running on a device
         """
         try:
             self.all_pid_list = adb_collect_pid_list(self.device,
@@ -234,7 +255,7 @@ class DeviceInteraction:
             raise
 
     def adb_collect_cgroup_pid_list(self, group=''):
-        """Collects pids from a given cgroup
+        """Collects list of all processes in a given cgroup running on a device
 
         :param group: cgroup name
         """
@@ -251,7 +272,7 @@ class DeviceInteraction:
     def adb_collect_page_data(self, cur_iteration, pid_list):
         """Collects information about memory pages
 
-        :param cur_iteration: iteration of collecting
+        :param cur_iteration: current iteration of collecting
         :param pid_list: list of pids to collect data from
         """
         page_data, present_data, swapped_data, error_pids = adb_collect_page_data(self.device, pid_list)
