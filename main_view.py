@@ -7,13 +7,13 @@ from PyQt5.QtGui import QGuiApplication
 from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QMessageBox, QAbstractItemView, QProgressBar, QTableWidgetItem, \
     QColorDialog, QTableWidget
 
-from cairo_draw import plot_pids_pagemap
 from custom_signals import CustomSignals
 from device_interaction import *
 from dynamicsDialog_view import DynamicsDialog
 from graph_view import barplot_pids_pagemap
 from handling.device_handler import DeviceHandler
 from handling.listener import Listener
+from pages_graphics import plot_pids_pagemap
 from picture_view import PhotoViewer
 from qt_ui.mainWindow_ui import Ui_MainWindow
 from selectDialog_view import SelectDialog
@@ -268,15 +268,16 @@ class MainView(QMainWindow, Listener):
     def plot_page_data(self, iteration):
         color_list = []
         highlighted_pid_list = []
-
         for pid in list(filter(lambda el: el['corrupted'] is False, self.active_pids)):
             if pid['highlighted'] is True:
                 highlighted_pid_list.append(pid['pid'])
-            color_list.append([pid['color'].red(), pid['color'].green(), pid['color'].blue(), pid['color'].alpha()])
+            color_list.append(pid['color'])
 
-        plot_pids_pagemap(self.device_interaction.get_page_data(iteration),
-                          color_list,
-                          str(iteration))
+        page_data = (self.device_interaction.get_page_data(iteration, present=True),
+                     self.device_interaction.get_page_data(iteration, swapped=True))
+
+        plot_pids_pagemap(page_data, color_list, iteration)
+
         barplot_pids_pagemap(self.device_interaction.get_page_data(iteration),
                              highlighted_pid_list,
                              str(iteration))

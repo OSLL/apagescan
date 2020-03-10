@@ -4,3 +4,4 @@ pandas
 matplotlib
 pyinstaller
 setuptools==44.0.0
+intervaltree
