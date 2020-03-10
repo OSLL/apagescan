@@ -3,7 +3,8 @@ import cairo
 # TODO: width, offsets and length should be calculated from device specifications
 
 
-def plot_pids_pagemap(page_data, colors, index=''):
+#  page_data - dict like {pid1: pid1_page_data, pid2: pid1_page_data}
+def plot_pids_pagemap(page_data, colors, index):
     """Creates plot displaying page map and saves the image to '.png'
 
     :param page_data: dictionary contains data like {pid1: pid1_page_data, pid2: pid1_page_data}
@@ -35,7 +36,7 @@ def plot_pids_pagemap(page_data, colors, index=''):
     colored_pid = dict(zip(page_data.keys(), colors))
 
     for pid, data in page_data.items():
-        color = [c / 255 for c in colored_pid.get(pid)]
+        color = colored_pid.get(pid)
 
         # Remove zero addresses if exist, and sort addresses value
         clear_data = [[d[0], d[1]] for d in data.values if d[0] != 0]
@@ -59,7 +60,7 @@ def plot_pids_pagemap(page_data, colors, index=''):
                 streak[is_present] += 1
 
             if x == width - 1:  # end of current line
-                context.set_source_rgba(color[0], color[1], color[2], color[3])
+                context.set_source_rgba(color.redF(), color.greenF(), color.blueF(), color.alphaF())
                 context.move_to(x, y)
                 context.line_to(width, y)
                 streak[is_present] = 1
@@ -67,11 +68,11 @@ def plot_pids_pagemap(page_data, colors, index=''):
                 continue
 
             if current[is_present] - pfn != -1:  # pages are far from each other
-                context.set_source_rgba(color[0], color[1], color[2], color[3])
+                context.set_source_rgba(color.redF(), color.greenF(), color.blueF(), color.alphaF())
                 context.move_to(x, y)
                 context.line_to(x + streak[is_present], y)
                 streak[is_present] = 1
                 current[is_present] = pfn
 
             context.stroke()
-    surface.write_to_png('resources/data/pictures/offsets/p' + index + '.png')
+    surface.write_to_png(f'resources/data/pictures/offsets/p{index}.png')
