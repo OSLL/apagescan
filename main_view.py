@@ -90,7 +90,7 @@ class MainView(QMainWindow, Listener):
     def update_data(self):
         self.device_interaction.clear()
 
-        if not self.devices_handler.device_selected():
+        if not self.devices_handler.is_device_selected():
             return
 
         try:
@@ -182,7 +182,7 @@ class MainView(QMainWindow, Listener):
 
     def react(self):
         super().react()
-        if not self.devices_handler.device_selected():
+        if not self.devices_handler.is_device_selected():
             self.view_checked_pids([])
             self.set_buttons(pid=False, data=False, refc=False, highlight=False)
         self.set_buttons()
@@ -199,7 +199,7 @@ class MainView(QMainWindow, Listener):
 
     @pyqtSlot()
     def dataButton_clicked(self):
-        if not self.devices_handler.device_selected():
+        if not self.devices_handler.is_device_selected():
             self.show_msg('Error', 'No attached devices')
             return
 
