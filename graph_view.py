@@ -17,7 +17,7 @@ def barplot_pids_pagemap(page_data, highlighted_pids, index=''):
                     'Anon': 'red'
                     }
 
-    for i, pid in enumerate(highlighted_pids):
+    for index, pid in enumerate(highlighted_pids):
         pid_pages_data = page_data.get(pid)
         total_pages = len(pid_pages_data)
 
@@ -28,9 +28,9 @@ def barplot_pids_pagemap(page_data, highlighted_pids, index=''):
         is_dirty_bar = get_percentage_values(total_pages, present_flag_count, dirty_flag_count)
         is_anon_bar = get_percentage_values(total_pages, present_flag_count, anon_flag_count)
 
-        plot_bar(ax, is_dirty_bar, y_offset=-i * 2,
+        plot_bar(ax, is_dirty_bar, y_offset=-index * 2,
                  colors=[flags_colors.get('Swapped'), flags_colors.get('Clean'), flags_colors.get('Dirty')])
-        plot_bar(ax, is_anon_bar, y_offset=-i * 2 - 1,
+        plot_bar(ax, is_anon_bar, y_offset=-index * 2 - 1,
                  colors=[flags_colors.get('Swapped'), flags_colors.get('Not Anon'), flags_colors.get('Anon')])
 
     # Set ticks and legend
