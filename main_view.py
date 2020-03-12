@@ -46,29 +46,30 @@ class MainView(QMainWindow, Listener):
         layout.addWidget(self.pages_graph)
         self._ui.graphicsPresent.setStyleSheet("background-color: whitesmoke")
 
-        self._ui.dataButton.clicked.connect(self.dataButton_clicked)
-        self._ui.pidsButton.clicked.connect(self.pidsButton_clicked)
-        self._ui.devicesButton.clicked.connect(self.devicesButton_clicked)
-        self._ui.playButton.clicked.connect(self.playButton_clicked)
-        self._ui.prevButton.clicked.connect(self.prevButton_clicked)
-        self._ui.nextButton.clicked.connect(self.nextButton_clicked)
-        self._ui.actionShow_CGroup_tree.triggered.connect(self.show_CGroup_tree)
-        self._ui.tableWidget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self._ui.tableWidget.customContextMenuRequested.connect(self.call_menu)
-        self._ui.refreshColorsButton.clicked.connect(self.refresh_colors)
+        self._ui.dataButton.clicked.connect(self.collect_data)
+        self._ui.pidsButton.clicked.connect(self.select_processes)
+        self._ui.actionShow_CGroup_tree.triggered.connect(self.select_processes_cgroup)
+        self._ui.devicesButton.clicked.connect(self.select_devices)
+        self._ui.playButton.clicked.connect(self.mem_dynamics)
+        self._ui.prevButton.clicked.connect(self.mem_prev_state)
+        self._ui.nextButton.clicked.connect(self.mem_next_state)
         self._ui.highlightButton.clicked.connect(self.highlight_pids)
+        self._ui.refreshColorsButton.clicked.connect(self.refresh_colors)
+        self._ui.tableWidget.customContextMenuRequested.connect(self.call_menu)
+
+        self._ui.tableWidget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
 
         self.timer = QtCore.QTimer()
         self.time = QtCore.QTime(0, 0, 0)
 
-        self.timer.timeout.connect(self.timerEvent)
+        self.timer.timeout.connect(self.timer_event)
         self.timer.start(1000)
 
         self.devices_handler.update()
 
         self.active_pids = []
         self.active_state = -1
-        self.len_active_pids = 0
+        self.active_pids_len = 0
         self.iteration_time = 0
         self.total_time = 0
         self.is_data_collected = False
@@ -89,7 +90,6 @@ class MainView(QMainWindow, Listener):
 
     def update_data(self):
         self.device_interaction.clear()
-
         if not self.devices_handler.device_selected():
             return
 
@@ -105,7 +105,7 @@ class MainView(QMainWindow, Listener):
             clean_tmp_data(remove_page_data=False, remove_pictures_data=False)
 
     def generate_pid_colors(self, update_active_pids=True):
-        for i in range(self.len_active_pids):
+        for i in range(self.active_pids_len):
             if self.active_pids[i]['corrupted']:
                 self.active_pids[i]['color'] = QColor(Qt.transparent)
             elif update_active_pids:
@@ -154,7 +154,7 @@ class MainView(QMainWindow, Listener):
                 item.setText(str(checked_pids[i][j]))
                 self._ui.tableWidget.setItem(i, j, item)
 
-        self.len_active_pids = len(self.active_pids)
+        self.active_pids_len = len(self.active_pids)
 
         self._ui.tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
         self._ui.tableWidget.setSelectionMode(QAbstractItemView.SingleSelection)
@@ -164,7 +164,7 @@ class MainView(QMainWindow, Listener):
         self._ui.tableWidget.horizontalHeader().setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
         self.is_data_collected = False
 
-    def timerEvent(self):
+    def timer_event(self):
         self.time = self.time.addSecs(1)
         self.timer.start(1000)
         self.devices_handler.update()
@@ -198,7 +198,7 @@ class MainView(QMainWindow, Listener):
                          nxt=(self.active_state < self.device_interaction.get_iterations() - 1))
 
     @pyqtSlot()
-    def dataButton_clicked(self):
+    def collect_data(self):
         if not self.devices_handler.device_selected():
             self.show_msg('Error', 'No attached devices')
             return
@@ -209,11 +209,11 @@ class MainView(QMainWindow, Listener):
         progress.move(self._ui.centralWidget.geometry().center())
 
         dynamics_dialog = DynamicsDialog()
-        dynamics_dialog.signals.send_data.connect(self.set_dynamics_dialog_data)
+        dynamics_dialog.signals.send_data.connect(self.set_collection_time)
         dynamics_dialog.exec_()
 
         if self.iteration_time < 0 or self.total_time <= 0:
-            QMessageBox.about(self, 'Error', 'Please enter the other number of iterations')
+            self.show_msg('Error', 'Please enter the other number of iterations')
             self.set_buttons(data=True, refc=True)
             return
 
@@ -235,21 +235,21 @@ class MainView(QMainWindow, Listener):
                 progress.hide()
                 self.set_buttons(data=False)
                 return
+
             iterations += 1
             self.device_interaction.set_iterations(iterations)
             sleep(self.iteration_time)
             cur_time = time.time()
             progress.setValue((cur_time - start_time) * 100 // self.total_time)
 
-        for i, pid in enumerate(self.active_pids):
+        for index, pid in enumerate(self.active_pids):
             if pid['pid'] in error_pids:
                 pid['corrupted'] = True
-                self._ui.tableWidget.item(i, 0).setCheckState(Qt.Unchecked)
+                self._ui.tableWidget.item(index, 0).setCheckState(Qt.Unchecked)
 
         # drawing all data after collecting to detect corrupted pids
         # and draw at the same time
-        update_active_pids = True if not self.is_data_collected else False
-        self.generate_pid_colors(update_active_pids)
+        self.generate_pid_colors(update_active_pids=True if not self.is_data_collected else False)
         self.display_page_data()
 
         progress.setValue(100)
@@ -267,10 +267,10 @@ class MainView(QMainWindow, Listener):
 
     def plot_page_data(self, iteration):
         color_list = []
-        highlighted_pids_list = []
+        highlighted_pid_list = []
         for pid in list(filter(lambda el: el['corrupted'] is False, self.active_pids)):
             if pid['highlighted'] is True:
-                highlighted_pids_list.append(pid['pid'])
+                highlighted_pid_list.append(pid['pid'])
             color_list.append(pid['color'])
 
         page_data = (self.device_interaction.get_page_data(iteration, present=True),
@@ -279,11 +279,11 @@ class MainView(QMainWindow, Listener):
         plot_pids_pagemap(page_data, color_list, iteration)
 
         barplot_pids_pagemap(self.device_interaction.get_page_data(iteration),
-                             highlighted_pids_list,
+                             highlighted_pid_list,
                              str(iteration))
 
     @pyqtSlot()
-    def playButton_clicked(self):
+    def mem_dynamics(self):
         self.active_state = 0
         for i in range(self.device_interaction.get_iterations()):  # simple implementation using sleep
             self._ui.nextButton.clicked.emit()
@@ -294,30 +294,30 @@ class MainView(QMainWindow, Listener):
                          play=True)
 
     @pyqtSlot()
-    def prevButton_clicked(self):
+    def mem_prev_state(self):
         if self.active_state > 0:
             self.active_state -= 1
             self.show_state(self.active_state)
 
     @pyqtSlot()
-    def nextButton_clicked(self):
+    def mem_next_state(self):
         if self.active_state < self.device_interaction.get_iterations() - 1:
             self.active_state += 1
             self.show_state(self.active_state)
 
     @pyqtSlot(list)
-    def set_pids_dialog_data(self, data):
+    def set_active_pids(self, data):
         self.view_checked_pids(data)
-        if self.len_active_pids > 0:
+        if self.active_pids_len > 0:
             self.set_buttons(data=True, refc=False, highlight=False)
 
     @pyqtSlot(list)
-    def set_dynamics_dialog_data(self, data):
+    def set_collection_time(self, data):
         self.iteration_time = data[0] if data else -1
         self.total_time = data[1] if data else -1
 
     @pyqtSlot(list)
-    def set_devices_dialog_data(self, data):
+    def set_device_data(self, data):
         data_len = len(data)
         self._ui.statusBar.showMessage(f'{str(*data[0]) if data_len > 0 else "No"} device was connected')
         if data_len > 0:
@@ -327,30 +327,30 @@ class MainView(QMainWindow, Listener):
         self.react()
 
     @pyqtSlot()
-    def pidsButton_clicked(self):
+    def select_processes(self):
         pids_dialog = SelectDialog(self.device_interaction.get_all_pid_list(),
                                    label='Select pids',
                                    parent=self)
         self.signals.pids_changed.connect(pids_dialog.update)
-        pids_dialog.signals.send_data.connect(self.set_pids_dialog_data)
+        pids_dialog.signals.send_data.connect(self.set_active_pids)
         pids_dialog.exec_()
 
     @pyqtSlot()
-    def devicesButton_clicked(self):
+    def select_devices(self):
         devices_dialog = SelectDialog(self.devices_handler.devices_list(),
                                       label='Select devices',
                                       close_on_detach=False,
                                       parent=self)
         devices_dialog.hide_select_all_push_button()
         self.signals.devices_changed.connect(devices_dialog.update)
-        devices_dialog.signals.send_data.connect(self.set_devices_dialog_data)
+        devices_dialog.signals.send_data.connect(self.set_device_data)
         devices_dialog.exec_()
 
     @pyqtSlot()
     def show_pid_info(self):
-        i = self._ui.tableWidget.selectedIndexes()[0].row()
-        pid = self.active_pids[i]['pid']
-        if self.active_pids[i]['corrupted']:
+        pid_index = self._ui.tableWidget.selectedIndexes()[0].row()
+        pid = self.active_pids[pid_index]['pid']
+        if self.active_pids[pid_index]['corrupted']:
             self.show_msg('Message', 'No access to the process data')
             return
         try:
@@ -360,11 +360,12 @@ class MainView(QMainWindow, Listener):
         except Exception:
             self.show_msg('Message', 'Data hasn\'t been collected yet')
 
-    def show_CGroup_tree(self):
+    @pyqtSlot()
+    def select_processes_cgroup(self):
         tree_dialog = TreeDialog(self.device_interaction.get_cgroups_list())
         transfer_data_facade = TreeDialogFacade(self.device_interaction, tree_dialog)
         self.signals.cgroup_changed.connect(tree_dialog.update)
-        tree_dialog.signals.send_data.connect(self.set_pids_dialog_data)
+        tree_dialog.signals.send_data.connect(self.set_active_pids)
         tree_dialog.signals.cgroup_data_request.connect(transfer_data_facade.transfer_data)
         tree_dialog.exec_()
 
@@ -399,15 +400,17 @@ class MainView(QMainWindow, Listener):
 
     # set color components according to table
     def set_table_color(self, pid_table_index):
-        for j in range(2):
-            self._ui.tableWidget.item(pid_table_index, j).setBackground(
+        columns = 2
+        for col in range(columns):
+            self._ui.tableWidget.item(pid_table_index, col).setBackground(
                 QBrush(self.active_pids[pid_table_index]['color']))
         if self.active_pids[pid_table_index]['corrupted']:
             self._ui.tableWidget.item(pid_table_index, 0).setCheckState(Qt.Unchecked)
             self._ui.tableWidget.item(pid_table_index, 0).setFlags(QtCore.Qt.ItemIsEnabled)
 
+    @pyqtSlot()
     def highlight_pids(self):
-        for index in range(self.len_active_pids):
+        for index in range(self.active_pids_len):
             if self._ui.tableWidget.item(index, 0).checkState() == Qt.Unchecked:
                 self.active_pids[index]['highlighted'] = False
                 if not self.active_pids[index]['corrupted']:
