@@ -68,7 +68,7 @@ def draw_addr_area(context_data, area_len, regions_map, pid_color_map, start_poi
                 pid = most_counted_pid[0][0]
                 color = pid_color_map[pid]
                 context.rectangle(x, y, block_size, block_size)
-                context.set_source_rgb(color.redF(), color.greenF(), color.blueF())
+                context.set_source_rgba(color.redF(), color.greenF(), color.blueF(), color.alphaF())
                 context.fill()
 
             if x + block_size >= width - 1:
