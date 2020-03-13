@@ -94,8 +94,8 @@ class MainView(QMainWindow, Listener):
             return
 
         try:
-            self.device_interaction.adb_collect_all_pid_list()
-            self.device_interaction.adb_collect_cgroups_list()
+            self.device_interaction.collect_pid_list_all()
+            self.device_interaction.collect_cgroups_list()
         except CalledProcessError:
             self.show_msg('Error', 'Check connection with device and tool presence')
         except EmptyDataError:
@@ -187,7 +187,7 @@ class MainView(QMainWindow, Listener):
             self.set_buttons(pid=False, data=False, refc=False, highlight=False)
         self.set_buttons()
         self.update_data()
-        self.signals.pids_changed.emit(list(self.device_interaction.get_all_pid_list()))
+        self.signals.pids_changed.emit(list(self.device_interaction.get_pid_list_all()))
         self.signals.devices_changed.emit(self.devices_handler.devices_list())
         self.signals.cgroup_changed.emit(self.device_interaction.get_cgroups_list())
 
@@ -228,7 +228,7 @@ class MainView(QMainWindow, Listener):
         while cur_time - start_time <= self.total_time:
             try:
                 pid_list = [pid['pid'] for pid in self.active_pids]
-                error_pids = self.device_interaction.adb_collect_page_data(cur_iteration=iterations, pid_list=pid_list)
+                error_pids = self.device_interaction.collect_page_data(cur_iteration=iterations, pid_list=pid_list)
             except Exception:
                 self.show_msg('Error', 'Either the process is a system process (no access) or it has already completed,'
                                        'also check tool presence')
@@ -328,7 +328,7 @@ class MainView(QMainWindow, Listener):
 
     @pyqtSlot()
     def pidsButton_clicked(self):
-        pids_dialog = SelectDialog(self.device_interaction.get_all_pid_list(),
+        pids_dialog = SelectDialog(self.device_interaction.get_pid_list_all(),
                                    label='Select pids',
                                    parent=self)
         self.signals.pids_changed.connect(pids_dialog.update)

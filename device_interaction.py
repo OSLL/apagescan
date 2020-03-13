@@ -33,13 +33,14 @@ def read_page_data(pid):
         offset = f.read(offset_size)
         flags = f.read(flags_size)
         while offset and flags:
-            # Convert to long long unsigned and to unsigned int
+            # Convert to uint64_t
             offset = struct.unpack('Q', offset)[0]
+            # Convert to uint32_t
             flags = struct.unpack('I', flags)[0]
-            data.append([offset,  # Swap offset or page address
+            data.append((offset,  # Swap offset or page address
                          get_bit(flags, shift=26),  # return 1 if page present : 0 if swapped
                          get_bit(flags, shift=4),  # return 1 if page dirty : 0 if clean
-                         get_bit(flags, shift=12)])  # return 1 if page anonymous : 0 if not
+                         get_bit(flags, shift=12)))  # return 1 if page anonymous : 0 if not
             # Read address
             offset = f.read(offset_size)
             flags = f.read(flags_size)
@@ -60,13 +61,13 @@ def adb_cgroups_list(device):
     return list(map(lambda x: x + '/tasks', re.findall(r'(\S+) cgroup ', raw_data)))
 
 
-def adb_collect_pid_list(device, tool, filename, pull_path, group):
+def adb_collect_pid_list(device, tool, filename, pull_path, group_name):
     # collect pid list on device
     exec_command(f'adb -s {device}',
                  'shell',
                  f'/data/local/testing/{tool}',
                  '/data/local/testing/',
-                 group)
+                 group_name)
     # pull pid list from device
     exec_command(f'adb -s {device}',
                  'pull',
@@ -83,7 +84,7 @@ def adb_collect_page_data(device, pid_list):
     error_pids = []
     for pid in pid_list:
         try:
-            filename = str(pid) + '_page_data'
+            filename = f'{pid}_page_data'
             # collect raw data on device
             exec_command(f'adb -s {device}',
                          'shell',
@@ -102,6 +103,7 @@ def adb_collect_page_data(device, pid_list):
         except Exception:
             error_pids.append(pid)
             continue
+
         p_data = list(filter(lambda el: el[1] == 1, data))
         s_data = list(filter(lambda el: el[1] == 0, data))
         page_data[pid] = pd.DataFrame(np.array(data))
@@ -117,16 +119,16 @@ class DeviceInteraction:
         self.present_page_data = {}
         self.swapped_page_data = {}
         self.error_pids = []
-        self.all_pid_list = []
-        self.cgroup_pid_list = []
+        self.pid_list_all = []
+        self.pid_list_cgroup = []
         self.cgroups_list = []
         self.iterations = None
 
-    def get_all_pid_list(self):
-        return self.all_pid_list
+    def get_pid_list_all(self):
+        return self.pid_list_all
 
-    def get_cgroup_pid_list(self):
-        return self.cgroup_pid_list
+    def get_pid_list_cgroup(self):
+        return self.pid_list_cgroup
 
     def get_cgroups_list(self):
         return self.cgroups_list
@@ -146,44 +148,45 @@ class DeviceInteraction:
         self.device = device
 
     def clear(self):
-        self.cgroup_pid_list = []
-        self.all_pid_list = []
+        self.pid_list_cgroup = []
+        self.pid_list_all = []
         self.cgroups_list = []
         self.error_pids = []
 
     def set_iterations(self, iterations):
         self.iterations = iterations
+
         for i in range(self.iterations):
             self.page_data.setdefault(i, OrderedDict())
             self.present_page_data.setdefault(i, OrderedDict())
             self.swapped_page_data.setdefault(i, OrderedDict())
 
-    def adb_collect_cgroups_list(self):
+    def collect_cgroups_list(self):
         self.cgroups_list = adb_cgroups_list(self.device)
 
-    def adb_collect_all_pid_list(self):
+    def collect_pid_list_all(self):
         try:
-            self.all_pid_list = adb_collect_pid_list(self.device,
+            self.pid_list_all = adb_collect_pid_list(self.device,
                                                      tool='get_pid_list',
                                                      filename='pid_list',
                                                      pull_path='pids_data',
-                                                     group='')
+                                                     group_name='')
         except Exception:
-            self.all_pid_list = []
+            self.pid_list_all = []
             raise
 
-    def adb_collect_cgroup_pid_list(self, group=''):
+    def collect_pid_list_cgroup(self, group=''):
         try:
-            self.cgroup_pid_list = adb_collect_pid_list(self.device,
+            self.pid_list_cgroup = adb_collect_pid_list(self.device,
                                                         tool='read_cgroup',
                                                         filename='group_list',
                                                         pull_path='pids_data',
-                                                        group=group)
+                                                        group_name=group)
         except Exception:
-            self.cgroup_pid_list = []
+            self.pid_list_cgroup = []
             raise
 
-    def adb_collect_page_data(self, cur_iteration, pid_list):
+    def collect_page_data(self, cur_iteration, pid_list):
         page_data, present_data, swapped_data, error_pids = adb_collect_page_data(self.device, pid_list)
         self.page_data[cur_iteration] = page_data
         self.present_page_data[cur_iteration] = present_data
