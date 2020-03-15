@@ -13,9 +13,10 @@ class TreeDialog(SelectDialog):
         self._ui = None
         self.model = None
         self.signals = CustomSignals
-        super(TreeDialog, self).__init__(cgroup_list)
 
-    def initUI(self):
+        super(TreeDialog, self).__init__(data_list=cgroup_list, has_select_all=True)
+
+    def initUI(self, label, has_select_all):
         self._ui = Ui_TreeDialog()
         self._ui.setupUi(self)
 
