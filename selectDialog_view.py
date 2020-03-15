@@ -1,13 +1,25 @@
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt, pyqtSlot
-from PyQt5.QtWidgets import QTableWidgetItem, QAbstractItemView
+from PyQt5.QtWidgets import QDialog, QTableWidgetItem, QAbstractItemView
 
-from dataDialog_view import DataDialog
+from custom_signals import CustomSignals
 from qt_ui.selectDialog_ui import Ui_SelectDialog
 
 
-class SelectDialog(DataDialog):
-    def initUI(self):
+class SelectDialog(QDialog):
+    def __init__(self, data_list, label='', close_on_detach=True, has_select_all=False, parent=None):
+        super(SelectDialog, self).__init__(parent)
+
+        self.data_list = data_list
+        self.rows = 0
+        self.cols = 0
+        self.label = label
+        self.signals = CustomSignals()
+        self.close_on_detach = close_on_detach
+
+        self.initUI(label, has_select_all)
+
+    def initUI(self, label, has_select_all):
         self._ui = Ui_SelectDialog()
         self._ui.setupUi(self)
         self._ui.label.setText(self.label)
@@ -21,43 +33,46 @@ class SelectDialog(DataDialog):
 
         self._ui.buttonBox.clicked.connect(self.button_clicked)
         self._ui.checkBox.clicked.connect(self.select_all_button_clicked)
+
+        if not has_select_all:
+            self._ui.checkBox.hide()
+
         self.set_data(self.data_list)
 
     def get_checked(self):
         checked_data = []
-        try:
-            for i in range(self.row):
-                if self._ui.tableWidget.item(i, 0).checkState() == Qt.Checked:
-                    checked_data.append([self.data_list[i][j] for j in range(len(self.data_list[i]))])
-        except AttributeError:
-            pass
+
+        for i in range(self.rows):
+            if self._ui.tableWidget.item(i, 0).checkState() == Qt.Checked:
+                checked_data.append(list(self.data_list[i]))
+
         return checked_data
 
     def button_clicked(self):
         self.signals.send_data.emit(self.get_checked())
 
     def select_all_button_clicked(self):
-        if self._ui.checkBox.checkState() == Qt.Checked:
-            for i in range(self.row):
-                self._ui.tableWidget.item(i, 0).setCheckState(Qt.Checked)
-        else:
-            for i in range(self.row):
-                self._ui.tableWidget.item(i, 0).setCheckState(Qt.Unchecked)
+        check_all = self._ui.checkBox.checkState() == Qt.Checked
+        for i in range(self.rows):
+            self._ui.tableWidget.item(i, 0).setCheckState(Qt.Checked if check_all else Qt.Unchecked)
 
     def set_data(self, new_data_list):
         if len(new_data_list) == 0:
             self._ui.tableWidget.clear()
             return
+
         old_checked = self.get_checked()
 
         self.data_list = new_data_list
-        self.row = len(self.data_list)
-        self.col = len(self.data_list[0])
-        self._ui.tableWidget.setColumnCount(self.col)
-        self._ui.tableWidget.setRowCount(self.row)
 
-        for i in range(self.row):
-            for j in range(self.col):
+        self.rows = len(self.data_list)
+        self.cols = len(self.data_list[0])
+
+        self._ui.tableWidget.setRowCount(self.rows)
+        self._ui.tableWidget.setColumnCount(self.cols)
+
+        for i in range(self.rows):
+            for j in range(self.cols):
                 item = QTableWidgetItem()
                 if j == 0:
                     item.setCheckState(Qt.Checked if list(self.data_list[i]) in old_checked else Qt.Unchecked)
@@ -69,7 +84,5 @@ class SelectDialog(DataDialog):
         if len(new_data_list) == 0 and self.close_on_detach:
             self.done(0)
             return
-        self.set_data(new_data_list)
 
-    def hide_select_all_push_button(self):
-        self._ui.checkBox.hide()
+        self.set_data(new_data_list)
