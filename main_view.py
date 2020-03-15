@@ -305,18 +305,18 @@ class MainView(QMainWindow, Listener):
             self.active_state += 1
             self.show_state(self.active_state)
 
-    @pyqtSlot(list)
+    @pyqtSlot(object)
     def set_active_pids(self, data):
         self.view_checked_pids(data)
         if self.active_pids_len > 0:
             self.set_buttons(data=True, refc=False, highlight=False)
 
-    @pyqtSlot(list)
+    @pyqtSlot(object)
     def set_collection_time(self, data):
-        self.iteration_time = data[0] if data else -1
-        self.total_time = data[1] if data else -1
+        self.iteration_time = data[0] if data is not None else -1
+        self.total_time = data[1] if data is not None else -1
 
-    @pyqtSlot(list)
+    @pyqtSlot(object)
     def set_device_data(self, data):
         data_len = len(data)
         self._ui.statusBar.showMessage(f'{str(*data[0]) if data_len > 0 else "No"} device was connected')
@@ -328,8 +328,9 @@ class MainView(QMainWindow, Listener):
 
     @pyqtSlot()
     def select_processes(self):
-        pids_dialog = SelectDialog(self.device_interaction.get_all_pid_list(),
+        pids_dialog = SelectDialog(data_list=self.device_interaction.get_all_pid_list(),
                                    label='Select pids',
+                                   has_select_all=True,
                                    parent=self)
         self.signals.pids_changed.connect(pids_dialog.update)
         pids_dialog.signals.send_data.connect(self.set_active_pids)
@@ -337,11 +338,10 @@ class MainView(QMainWindow, Listener):
 
     @pyqtSlot()
     def select_devices(self):
-        devices_dialog = SelectDialog(self.devices_handler.devices_list(),
+        devices_dialog = SelectDialog(data_list=self.devices_handler.devices_list(),
                                       label='Select devices',
                                       close_on_detach=False,
                                       parent=self)
-        devices_dialog.hide_select_all_push_button()
         self.signals.devices_changed.connect(devices_dialog.update)
         devices_dialog.signals.send_data.connect(self.set_device_data)
         devices_dialog.exec_()
