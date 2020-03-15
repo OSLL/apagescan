@@ -86,3 +86,7 @@ class SelectDialog(QDialog):
             return
 
         self.set_data(new_data_list)
+
+    def closeEvent(self, event):
+        self.signals.send_data.emit([])
+        event.accept()
