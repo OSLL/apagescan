@@ -308,8 +308,9 @@ class MainView(QMainWindow, Listener):
     @pyqtSlot(object)
     def set_active_pids(self, data):
         self.view_checked_pids(data)
-        if self.active_pids_len > 0:
-            self.set_buttons(data=True, refc=False, highlight=False)
+        self.set_buttons(data=True if self.active_pids_len > 0 else False,
+                         refc=False,
+                         highlight=False)
 
     @pyqtSlot(object)
     def set_collection_time(self, data):
