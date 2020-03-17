@@ -187,7 +187,7 @@ class MainView(QMainWindow, Listener):
             self.set_buttons(pid=False, data=False, refc=False, highlight=False)
         self.set_buttons()
         self.update_data()
-        self.signals.pids_changed.emit(list(self.device_interaction.get_pid_list_all()))
+        self.signals.pids_changed.emit(self.device_interaction.get_pid_list_all())
         self.signals.devices_changed.emit(self.devices_handler.devices_list())
         self.signals.cgroup_changed.emit(self.device_interaction.get_cgroups_list())
 
@@ -319,12 +319,12 @@ class MainView(QMainWindow, Listener):
 
     @pyqtSlot(object)
     def set_device_data(self, data):
-        data_len = len(data)
-        self._ui.statusBar.showMessage(f'{str(*data[0]) if data_len > 0 else "No"} device was connected')
-        if data_len > 0:
-            self.devices_handler.switch(str(*data[0]))
+        if len(data) > 0:
+            self.devices_handler.switch(str(data[0][0]))
             self.device_interaction.set_device(self.devices_handler.get_device())
             self.set_buttons(pid=True, cgr=True)
+
+        self._ui.statusBar.showMessage(f'{data[0][0] if len(data) > 0 else "No"} device was connected')
         self.react()
 
     @pyqtSlot()
