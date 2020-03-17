@@ -9,8 +9,7 @@ from qt_ui.selectDialog_ui import Ui_SelectDialog
 class SelectDialog(QDialog):
     def __init__(self, data_list, label='', close_on_detach=True, has_select_all=False, parent=None):
         super(SelectDialog, self).__init__(parent)
-
-        self.data_list = data_list
+        self.data_list = []
         self.rows = 0
         self.cols = 0
         self.label = label
@@ -18,6 +17,7 @@ class SelectDialog(QDialog):
         self.close_on_detach = close_on_detach
 
         self.initUI(label, has_select_all)
+        self.set_data(data_list)
 
     def initUI(self, label, has_select_all):
         self._ui = Ui_SelectDialog()
@@ -37,14 +37,12 @@ class SelectDialog(QDialog):
         if not has_select_all:
             self._ui.checkBox.hide()
 
-        self.set_data(self.data_list)
-
     def get_checked(self):
         checked_data = []
-
         for i in range(self.rows):
-            if self._ui.tableWidget.item(i, 0).checkState() == Qt.Checked:
-                checked_data.append(list(self.data_list[i]))
+            item = self._ui.tableWidget.item(i, 0)
+            if item is not None and item.checkState() == Qt.Checked:
+                checked_data.append(self.data_list[i])
 
         return checked_data
 
@@ -56,14 +54,19 @@ class SelectDialog(QDialog):
         for i in range(self.rows):
             self._ui.tableWidget.item(i, 0).setCheckState(Qt.Checked if check_all else Qt.Unchecked)
 
-    def set_data(self, new_data_list):
-        if len(new_data_list) == 0:
+    def set_data(self, data_list):
+        if len(data_list) == 0:
             self._ui.tableWidget.clear()
             return
 
         old_checked = self.get_checked()
 
-        self.data_list = new_data_list
+        # check if given data list in multi-dimensional
+        # if not make it multi-dimensional to fit in table widget
+        if not all(isinstance(el, list) for el in data_list):
+            data_list = tuple([el] for el in data_list)
+
+        self.data_list = data_list
 
         self.rows = len(self.data_list)
         self.cols = len(self.data_list[0])
@@ -75,7 +78,8 @@ class SelectDialog(QDialog):
             for j in range(self.cols):
                 item = QTableWidgetItem()
                 if j == 0:
-                    item.setCheckState(Qt.Checked if list(self.data_list[i]) in old_checked else Qt.Unchecked)
+                    item.setCheckState(Qt.Checked if self.data_list[i] in old_checked else Qt.Unchecked)
+
                 item.setText(str(self.data_list[i][j]))
                 self._ui.tableWidget.setItem(i, j, item)
 
