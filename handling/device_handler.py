@@ -1,5 +1,5 @@
-import numpy as np
 import re
+from itertools import chain
 
 from utilities import exec_command
 
@@ -8,21 +8,21 @@ class DeviceHandler:
     def __init__(self):
         self.listeners = []
         self.serial_numbers = []
-        self.current_device_number = None
+        self.current_device_id = None
 
     def is_device_selected(self):
-        return self.current_device_number in list(np.asarray(self.serial_numbers).flatten())
+        return self.current_device_id in list(chain.from_iterable(self.serial_numbers))
 
     def has_devices(self):
         return len(self.serial_numbers) != 0
 
     def get_device(self):
-        return self.current_device_number
+        return self.current_device_id
 
     def switch(self, device_number):
-        self.current_device_number = device_number
+        self.current_device_id = device_number
         if not self.is_device_selected():
-            self.current_device_number = None
+            self.current_device_id = None
 
     def devices_list(self):
         return self.serial_numbers
@@ -38,7 +38,7 @@ class DeviceHandler:
         self.serial_numbers = list(map(lambda x: number_pattern.findall(x), output[1:]))
 
         if len(self.serial_numbers) == 0:
-            self.current_device_number = None
+            self.current_device_id = None
 
         if sorted(self.serial_numbers) != sorted(prev_state):
             for listener in self.listeners:
