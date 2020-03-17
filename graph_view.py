@@ -3,7 +3,7 @@ import numpy as np
 from matplotlib.figure import Figure
 
 
-def barplot_pids_pagemap(page_data, highlighted_pids, index=''):
+def barplot_pids_pagemap(page_data, highlighted_pids, iteration=''):
     # TODO Remove hardcoded values, use values depending on widget size
     width = 13
     height = 2
@@ -42,7 +42,7 @@ def barplot_pids_pagemap(page_data, highlighted_pids, index=''):
     ax.legend(handles=[mpatches.Patch(color=flags_colors.get(flag), label=flag) for flag in flags_colors],
               bbox_to_anchor=(1, 1), loc='upper left', ncol=1, fontsize='small')
     # Save data to png
-    ax.figure.savefig('resources/data/pictures/barplot/b' + index + '.png')
+    ax.figure.savefig('resources/data/pictures/barplot/b' + iteration + '.png')
 
 
 def get_flags_count(data, column):
@@ -55,7 +55,7 @@ def get_percentage_values(total_pages, present_flag, any_flag):
     flags_count_data = [present_flag.get(0, 0),  # swapped
                         present_flag.get(1, 0) - any_flag.get(1, 0),  # present - any
                         any_flag.get(1, 0)]
-    return [100 * x / total_pages for x in flags_count_data]
+    return [100 * flag_pages_count / total_pages for flag_pages_count in flags_count_data]
 
 
 def plot_bar(ax, bar_data, y_offset, colors):
