@@ -7,8 +7,8 @@ from utilities import create_regions_map
 RAM_SIZE = 2 ** 31  # 2 gb
 SWAP_SIZE = 20 * (2 ** 20)  # 20 mb
 PAGE_SIZE = 4096
-block_size = 10  # pixel size
-pages_in_block = 64
+BLOCK_SIZE = 10  # pixel size
+PAGES_IN_BLOCK = 64
 
 """
 Page size = 4096, i assumed 64 pages in block.
@@ -31,7 +31,7 @@ def draw_hblocks_line(context, start_point, length, width_in_blocks=1):
     :return: None
     """
     start_x, start_y = start_point
-    context.rectangle(start_x, start_y, length, block_size * width_in_blocks - 1)
+    context.rectangle(start_x, start_y, length, BLOCK_SIZE * width_in_blocks - 1)
     context.set_source_rgb(0, 0, 0)
     context.fill()
 
@@ -56,29 +56,29 @@ def draw_addr_area(context_data, area_len, regions_map, pid_color_map, start_poi
     pages_count = area_len // PAGE_SIZE
 
     while pfn < pages_count:
-        intervals = regions_map[pfn:pfn + pages_in_block]
+        intervals = regions_map[pfn:pfn + PAGES_IN_BLOCK]
 
         for interval in intervals:
             pid_counter[interval.data] += 1
 
         # block has been processed, draw it
-        if pfn % pages_in_block == 0:
+        if pfn % PAGES_IN_BLOCK == 0:
             most_counted_pid = pid_counter.most_common(1)
             if most_counted_pid:
                 pid = most_counted_pid[0][0]
                 color = pid_color_map[pid]
-                context.rectangle(x, y, block_size, block_size)
-                context.set_source_rgb(color.redF(), color.greenF(), color.blueF())
+                context.rectangle(x, y, BLOCK_SIZE, BLOCK_SIZE)
+                context.set_source_rgba(color.redF(), color.greenF(), color.blueF(), color.alphaF())
                 context.fill()
 
-            if x + block_size >= width - 1:
-                y += block_size
+            if x + BLOCK_SIZE >= width - 1:
+                y += BLOCK_SIZE
 
-            x = (x + block_size) % width
+            x = (x + BLOCK_SIZE) % width
 
             pid_counter.clear()
 
-        pfn += pages_in_block
+        pfn += PAGES_IN_BLOCK
 
 
 def plot_pids_pagemap(page_data, colors_list, iteration):
@@ -92,7 +92,7 @@ def plot_pids_pagemap(page_data, colors_list, iteration):
     ram_width, ram_height = 128, 64
     swap_width, swap_height = 80, 1
 
-    pix_width, pix_height = max(ram_width, swap_width) * block_size, (ram_height + swap_height + 1) * block_size
+    pix_width, pix_height = max(ram_width, swap_width) * BLOCK_SIZE, (ram_height + swap_height + 1) * BLOCK_SIZE
 
     present_regions = create_regions_map(page_data[0])
     swapped_regions = create_regions_map(page_data[1])
@@ -113,12 +113,12 @@ def plot_pids_pagemap(page_data, colors_list, iteration):
                    RAM_SIZE,
                    present_regions,
                    pid_color_map)
-    draw_hblocks_line(context, (0, ram_height * block_size), pix_width)
+    draw_hblocks_line(context, (0, ram_height * BLOCK_SIZE), pix_width)
     draw_addr_area((context, pix_width, pix_height),
                    SWAP_SIZE,
                    swapped_regions,
                    pid_color_map,
-                   (0, (ram_height + 1) * block_size))
+                   (0, (ram_height + 1) * BLOCK_SIZE))
 
     surface.write_to_png(f'resources/data/pictures/offsets/p{iteration}.png')
     surface.finish()
