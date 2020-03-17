@@ -2,7 +2,7 @@ import re
 import struct
 import subprocess
 from collections import OrderedDict
-from subprocess import CalledProcessError
+from subprocess import SubprocessError
 
 import numpy as np
 import pandas as pd
@@ -56,7 +56,7 @@ def adb_cgroups_list(device):
     # Read /proc/mounts - file with all mount points
     try:
         raw_data = str(exec_command(f'adb -s {device}', 'shell', 'cat', '/proc/mounts'))
-    except CalledProcessError:
+    except SubprocessError:
         raw_data = ''
     return list(map(lambda x: x + '/tasks', re.findall(r'(\S+) cgroup ', raw_data)))
 
@@ -100,7 +100,7 @@ def adb_collect_page_data(device, pid_list):
                          print_output=True)
             # create data from raw data
             data = read_page_data(pid)
-        except Exception:
+        except (SubprocessError, EmptyDataError):
             error_pids.append(pid)
             continue
 
@@ -171,7 +171,7 @@ class DeviceInteraction:
                                                      filename='pid_list',
                                                      pull_path='pids_data',
                                                      group_name='')
-        except Exception:
+        except (SubprocessError, EmptyDataError):
             self.pid_list_all = []
             raise
 
@@ -182,7 +182,7 @@ class DeviceInteraction:
                                                         filename='group_list',
                                                         pull_path='pids_data',
                                                         group_name=group)
-        except Exception:
+        except (SubprocessError, EmptyDataError):
             self.pid_list_cgroup = []
             raise
 
