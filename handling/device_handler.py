@@ -11,7 +11,7 @@ class DeviceHandler:
         self.current_device_id = None
 
     def is_device_selected(self):
-        return self.current_device_id in list(chain.from_iterable(self.serial_numbers))
+        return self.current_device_id in self.serial_numbers
 
     def has_devices(self):
         return len(self.serial_numbers) != 0
@@ -35,7 +35,9 @@ class DeviceHandler:
         prev_state = self.serial_numbers
         output = [x for x in res.decode('UTF-8').split('\n') if x]
         number_pattern = re.compile(r'(.*)\t')
-        self.serial_numbers = list(map(lambda x: number_pattern.findall(x), output[1:]))
+        serial_numbers = list(map(lambda x: number_pattern.findall(x), output[1:]))
+        # flatten list
+        self.serial_numbers = list(chain.from_iterable(serial_numbers))
 
         if len(self.serial_numbers) == 0:
             self.current_device_id = None
