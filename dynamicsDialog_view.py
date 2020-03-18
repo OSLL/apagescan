@@ -34,9 +34,9 @@ class DynamicsDialog(QDialog):
         iteration_time = float(self._ui.iterationTimeEdit.text())
         total_time = float(self._ui.totalTimeEdit.text())
         if iteration_time <= total_time:
-            return [iteration_time, total_time]
+            return iteration_time, total_time
         else:
-            return []
+            return None
 
     def button_clicked(self):
         self.signals.send_data.emit(self.get_values())
@@ -50,7 +50,7 @@ class DynamicsDialog(QDialog):
             self._ui.buttonBox.setEnabled(False)
 
     def closeEvent(self, event):
-        self.signals.send_data.emit([])
+        self.signals.send_data.emit(None)
         event.accept()
 
     def reject(self):
