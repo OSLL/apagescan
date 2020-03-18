@@ -11,7 +11,7 @@
 #define BUF_SIZE 1000
 #define INIT_ARR_SIZE 1000
 #define RESIZE_C 1.5
-#define CHUNK_SIZE 4092 //4092 can be divided by 12 so buffer can contain info about 341 pages
+#define CHUNK_SIZE 9600 //single pagedata includes 64 + 32 = 96 bytes, buffer for 100 data records
 #define PAGE_SIZE sysconf(_SC_PAGE_SIZE)
 
 #define PFN(page) (page & 0x7FFFFFFFFFFFFF)            //first 54 bits
@@ -62,15 +62,6 @@ uint64_t read_u64(int fd, unsigned long offset) {
         exit(EXIT_FAILURE);
     }
     return data;
-}
-
-//function writes data in binary format to buffer
-void to_bin(void *data, char *buffer, size_t size) {
-    unsigned char *temp = (unsigned char *) data;
-    for (int i = 0; i < size; i++) {
-        *buffer = temp[i];
-        buffer++;
-    }
 }
 
 //function initializes an array of AddrPair structures  and fills it with pairs of block's start and end addresses
@@ -176,7 +167,7 @@ unsigned long get_pages_info(PageInfo **pages, AddrPair *addr_data, long addr_da
         block_size = (addr_data[i].end - addr_data[i].begin) / PAGE_SIZE;
         if (pages_counter + block_size >= size - 1) {
             size = (unsigned long) (size + block_size + 1);
-            *pages = realloc(*pages, size * sizeof(PageInfo));
+            *pages = (PageInfo *)realloc(*pages, size * sizeof(PageInfo));
         }
         nread = get_page_info_block(page_fd, flags_fd, pages, block_size, addr_data[i].begin, pages_counter);
         pages_counter += nread;
@@ -202,24 +193,20 @@ int create_data_file(PageInfo *data, unsigned long data_size, char *path_to_save
     memset(file_buffer, 0, CHUNK_SIZE);
     unsigned long buffer_count = 0;
     unsigned long i = 0;
-    unsigned int flags_data = 0;
-    void *bin_data = NULL;
+    uint32_t flags_data = 0;
     while (i < data_size) {
         flags_data = 0;
-        if (data[i].swapped != 0 || data[i].present != 0) {
-            if (data[i].present != -1) { //unmapped pages have no flags -> flags_data = 0
-                INITIALIZE_CUSTOM_DIRTY(flags_data, data[i].dirty);
-                INITIALIZE_CUSTOM_ANON(flags_data, data[i].anon);
-                INITIALIZE_CUSTOM_PRESENT(flags_data, data[i].present);
+        //unmapped pages have no flags, no reason to include them
+        if (data[i].present != -1 && (data[i].swapped || data[i].present)) {
+            INITIALIZE_CUSTOM_DIRTY(flags_data, data[i].dirty);
+            INITIALIZE_CUSTOM_ANON(flags_data, data[i].anon);
+            INITIALIZE_CUSTOM_PRESENT(flags_data, data[i].present);
 
-                uint64_t temp_data = data[i].present == 1 ? data[i].pfn : data[i].swap_offset;
-                bin_data = &temp_data;
-                to_bin(bin_data, &file_buffer[buffer_count], sizeof(uint64_t));
-                buffer_count += sizeof(uint64_t);
-                bin_data = &flags_data;
-                to_bin(bin_data, &file_buffer[buffer_count], sizeof(unsigned int));
-                buffer_count += sizeof(unsigned int);
-            }
+            uint64_t page_offset = data[i].present == 1 ? data[i].pfn : data[i].swap_offset;
+            memcpy(file_buffer + buffer_count, &page_offset, sizeof(uint64_t));
+            buffer_count += sizeof(uint64_t);
+            memcpy(file_buffer + buffer_count, &flags_data, sizeof(uint32_t));
+            buffer_count += sizeof(uint32_t);
         }
         i++;
         // if the chunk is big enough, write it.
