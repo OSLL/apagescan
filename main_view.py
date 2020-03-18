@@ -112,7 +112,7 @@ class MainView(QMainWindow, Listener):
         except EmptyDataError:
             self.show_msg('Error', 'Pid list unavailable')
         finally:
-            clean_tmp_data_from_device(device=self.devices_handler.get_device(), remove_page_data=False)
+            clean_tmp_data_from_device(device=self.devices_handler.current_device, remove_page_data=False)
             clean_tmp_data(remove_page_data=False, remove_pictures_data=False)
 
     def generate_pid_colors(self, update_active_pids=True):
@@ -139,7 +139,7 @@ class MainView(QMainWindow, Listener):
         except AttributeError:
             pass  # no data collected yet
         finally:
-            clean_tmp_data_from_device(device=self.devices_handler.get_device(), remove_pids_data=False)
+            clean_tmp_data_from_device(device=self.devices_handler.current_device, remove_pids_data=False)
             clean_tmp_data(remove_pictures_data=False, remove_pids_data=False)
 
     def refresh_colors(self):
@@ -206,7 +206,7 @@ class MainView(QMainWindow, Listener):
         QMessageBox.about(self, msg_type, msg)
 
     def closeEvent(self, event):
-        clean_tmp_data_from_device(device=self.devices_handler.get_device())
+        clean_tmp_data_from_device(device=self.devices_handler.current_device)
         clean_tmp_data()
         event.accept()
 
@@ -218,7 +218,7 @@ class MainView(QMainWindow, Listener):
         self.set_buttons()
         self.update_data()
         self.signals.pids_changed.emit(self.device_interaction.get_pid_list_all())
-        self.signals.devices_changed.emit(self.devices_handler.devices_list())
+        self.signals.devices_changed.emit(self.devices_handler.devices_list)
         self.signals.cgroup_changed.emit(self.device_interaction.get_cgroups_list())
 
     def show_state(self, state_index):
@@ -367,7 +367,7 @@ class MainView(QMainWindow, Listener):
     def set_device_data(self, data):
         if len(data) > 0:
             self.devices_handler.switch(str(data[0][0]))
-            self.device_interaction.set_device(self.devices_handler.get_device())
+            self.device_interaction.set_device(self.devices_handler.current_device)
             self.set_buttons(pid=True, cgr=True)
 
         self._ui.statusBar.showMessage(f'{data[0][0] if len(data) > 0 else "No"} device was connected')
@@ -389,7 +389,7 @@ class MainView(QMainWindow, Listener):
     def select_devices(self):
         """Opens menu for selecting working device
         """
-        devices_dialog = SelectDialog(data_list=self.devices_handler.devices_list(),
+        devices_dialog = SelectDialog(data_list=self.devices_handler.devices_list,
                                       label='Select devices',
                                       close_on_detach=False,
                                       parent=self)
