@@ -193,6 +193,8 @@ int create_data_file(PageInfo *data, unsigned long data_size, char *path_to_save
     memset(file_buffer, 0, CHUNK_SIZE);
     unsigned long buffer_count = 0;
     unsigned long i = 0;
+
+    uint64_t page_offset = 0;
     uint32_t flags_data = 0;
     while (i < data_size) {
         flags_data = 0;
@@ -202,7 +204,7 @@ int create_data_file(PageInfo *data, unsigned long data_size, char *path_to_save
             INITIALIZE_CUSTOM_ANON(flags_data, data[i].anon);
             INITIALIZE_CUSTOM_PRESENT(flags_data, data[i].present);
 
-            uint64_t page_offset = data[i].present == 1 ? data[i].pfn : data[i].swap_offset;
+            page_offset = data[i].present == 1 ? data[i].pfn : data[i].swap_offset;
             memcpy(file_buffer + buffer_count, &page_offset, sizeof(uint64_t));
             buffer_count += sizeof(uint64_t);
             memcpy(file_buffer + buffer_count, &flags_data, sizeof(uint32_t));
