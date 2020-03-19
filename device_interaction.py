@@ -23,10 +23,13 @@ from pandas.errors import EmptyDataError
 
 
 def get_bit(data, shift):
-    """Checks whether bit is 1 or 0
+    """Get the flag information from data
 
-    :param data: given number
-    :param shift: bit offset"""
+    :param data: 32-bit number, containing info about flags for 1 page
+    :param shift: bit offset for certain flag checking
+    :return: 0 or 1 (ex. 1 if page present : 0 if swapped for shift=26)
+    :rtype: Int
+    """
     return (data >> shift) & 1
 
 
@@ -34,7 +37,9 @@ def exec_command(*args, print_output=False):
     """Executes command using subprocess module
 
     :param args: arguments of a command to be executed
-    :param print_output: true is output has to be printed, false if not
+    :param print_output: True is output has to be printed, False if not
+    :return: the console output for executed command
+    :rtype: byte
     """
     exec_str = ' '.join(args)
     output = subprocess.check_output(exec_str, shell=True)
@@ -44,9 +49,13 @@ def exec_command(*args, print_output=False):
 
 
 def read_page_data(pid):
-    """Reads pages of a given pid
+    """Reads binary data for pages of a given pid and convert it to list of tuples.
+    One tuple is one page. Tuple is kind of (<Swap offset or page address>, <flag>, <flag>, ...)
 
     :param pid: pid
+    :return: list containing information about each page
+    :rtype: List
+    :raises EmptyDataError: if no data was stored for current pid
     """
     # The number of bytes for offset (address) and flags in binary file
     offset_size = 8
@@ -79,9 +88,11 @@ def read_page_data(pid):
 
 
 def adb_cgroups_list(device):
-    """Get control groups list from device
+    """Searches control groups in /proc/mounts file and returns paths to it's tasks files
 
-    :param device: device
+    :param device: device's serial number
+    :return: list of paths to control groups' tasks files
+    :rtype: List
     """
     try:
         raw_data = str(exec_command(f'adb -s {device}', 'shell', 'cat', '/proc/mounts'))
@@ -91,13 +102,15 @@ def adb_cgroups_list(device):
 
 
 def adb_collect_pid_list(device, tool, filename, pull_path, group_name):
-    """Collect pid list from device
+    """Collect list of processes from device
 
-    :param device: target device
-    :param tool: script name on android device
+    :param device: target device's serial number
+    :param tool: script name on android device (get_pid_list or read_cgroup)
     :param filename: data filename on android device
     :param pull_path: path for data on PC
-    :param group_name: control group to collect pid list from
+    :param group_name: control group to collect list of processes from; group_name='' for get_pid_list tool
+    :return: list of processes like [[<pid>, <process full name>], [<pid>, <process full name>]...]
+    :rtype: numpy.ndarray
     """
     exec_command(f'adb -s {device}',
                  'shell',
@@ -116,8 +129,13 @@ def adb_collect_pid_list(device, tool, filename, pull_path, group_name):
 def adb_collect_page_data(device, pid_list):
     """Collect information about memory pages
 
-    :param device: target device
+    :param device: target device's serial number
     :param pid_list: list of processes to be examined
+    :return: page_data - info about all pages for each pid from pid_list, except error_pids,
+    present_data - info about all PRESENT pages for each pid from pid_list,
+    swapped_data - info about all SWAPPED pages for each pid from pid_list,
+    error_pids - list of pids, to which there was no access
+    :rtype: OrderedDict, OrderedDict, OrderedDict, List
     """
     page_data = OrderedDict()
     swapped_data = OrderedDict()
@@ -156,6 +174,7 @@ def adb_collect_page_data(device, pid_list):
 class DeviceInteraction:
     """
     Class for interaction with Android device and collection of device's running processes' pagedata
+
     :ivar device: serial number of connected android device
     :ivar page_data: processes' memory pagedata
     :ivar present_page_data: processes' present memory pagedata
