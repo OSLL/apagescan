@@ -1,7 +1,7 @@
 import re
 from itertools import chain
 
-from utilities import exec_command
+from utilities import exec_command, list_difference
 
 
 class DeviceHandler:
@@ -42,6 +42,6 @@ class DeviceHandler:
         if len(self.serial_numbers) == 0:
             self.current_device_id = None
 
-        if sorted(self.serial_numbers) != sorted(prev_state):
+        if list_difference(self.serial_numbers, prev_state):
             for listener in self.listeners:
                 listener.react()
