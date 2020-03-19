@@ -5,7 +5,7 @@ from qt_ui.tableDialog_ui import Ui_TableDialog
 
 
 class TableDialog(QDialog):
-    """TableDialog class: dialog for displaying data in the table
+    """Widget for displaying data (represented as list) in table form
     """
     def __init__(self, pid, pages_list):
         super(TableDialog, self).__init__()
