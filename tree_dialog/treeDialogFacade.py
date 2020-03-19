@@ -1,4 +1,3 @@
-import os
 from subprocess import CalledProcessError
 
 from PyQt5.QtCore import QObject, pyqtSlot
@@ -6,7 +5,6 @@ from PyQt5.QtWidgets import QMessageBox
 from pandas.errors import EmptyDataError
 
 
-# facade class to handle transfer data between device and TreeDialog instance
 class TreeDialogFacade(QObject):
     """Facade class to handle transfer data between device and treeDialog instance
     """

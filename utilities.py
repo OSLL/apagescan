@@ -27,7 +27,6 @@ def sleep(sec):
     """Suspends (waits) execution of the app for a given number of seconds
 
     :param sec: number of seconds to sleep for
-
     :return: None
     """
     loop = QEventLoop()
@@ -40,7 +39,6 @@ def clean_tmp_data_from_device(device, remove_page_data=True, remove_pids_data=T
 
     :param remove_page_data: True if page data has to be removed, False if not
     :param remove_pids_data: True if pids data has to be removed, False if not
-
     :return: None
     """
     page_data_mask = '*_page_data'
@@ -61,7 +59,6 @@ def clean_tmp_data(remove_page_data=True, remove_pictures_data=True, remove_pids
     :param remove_page_data: True if page data has to be removed, False if not
     :param remove_pids_data: True if pids data has to be removed, False if not
     :param remove_pictures_data: true if pictures data has to be removed, false if not
-
     :return: None
     """
     page_data_mask = '*_page_data'
@@ -91,7 +88,6 @@ def create_regions_map(page_data={}):
     """Creates tree of processes memory regions
 
     :param page_data: data about each page for each inspected process
-
     :return: tree of regions represented as (start_pfn, end_pfn, pid)
     :rtype: IntervalTree
     """
