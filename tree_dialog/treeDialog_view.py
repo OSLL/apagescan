@@ -5,17 +5,19 @@ from selectDialog_view import SelectDialog
 from qt_models.pidTreeModel import PidTreeModel
 from qt_ui.treeDialog_ui import Ui_TreeDialog
 
+from utilities import list_difference
+
 
 class TreeDialog(SelectDialog):
-
     def __init__(self, cgroup_list):
         self.cgroup_list = cgroup_list
         self._ui = None
         self.model = None
         self.signals = CustomSignals
-        super(TreeDialog, self).__init__(cgroup_list)
 
-    def initUI(self):
+        super(TreeDialog, self).__init__(data_list=cgroup_list, has_select_all=True)
+
+    def initUI(self, label, has_select_all):
         self._ui = Ui_TreeDialog()
         self._ui.setupUi(self)
 
@@ -56,8 +58,8 @@ class TreeDialog(SelectDialog):
     def set_data(self, new_data_list):
         prev_group_list, self.cgroup_list = self.cgroup_list, new_data_list
 
-        if prev_group_list != self.cgroup_list:
+        if list_difference(self.cgroup_list, prev_group_list):
             self._ui.groups.clear()
-            for group in self.groups:
+            for group in self.cgroup_list:
                 self._ui.groups.addItem(group)
 

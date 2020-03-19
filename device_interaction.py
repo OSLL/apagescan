@@ -166,22 +166,24 @@ class DeviceInteraction:
 
     def collect_pid_list_all(self):
         try:
-            self.pid_list_all = adb_collect_pid_list(self.device,
-                                                     tool='get_pid_list',
-                                                     filename='pid_list',
-                                                     pull_path='pids_data',
-                                                     group_name='')
+            pid_list_all = adb_collect_pid_list(self.device,
+                                                tool='get_pid_list',
+                                                filename='pid_list',
+                                                pull_path='pids_data',
+                                                group_name='')
+            self.pid_list_all = pid_list_all.tolist()
         except (SubprocessError, EmptyDataError):
             self.pid_list_all = []
             raise
 
     def collect_pid_list_cgroup(self, group=''):
         try:
-            self.pid_list_cgroup = adb_collect_pid_list(self.device,
-                                                        tool='read_cgroup',
-                                                        filename='group_list',
-                                                        pull_path='pids_data',
-                                                        group_name=group)
+            pid_list_cgroup = adb_collect_pid_list(self.device,
+                                                   tool='read_cgroup',
+                                                   filename='group_list',
+                                                   pull_path='pids_data',
+                                                   group_name=group)
+            self.pid_list_cgroup = pid_list_cgroup.tolist()
         except (SubprocessError, EmptyDataError):
             self.pid_list_cgroup = []
             raise
