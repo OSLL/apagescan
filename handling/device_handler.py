@@ -1,65 +1,90 @@
-import subprocess
+import re
+from itertools import chain
 
-import numpy as np
+from utilities import exec_command, list_difference
 
 
 class DeviceHandler:
-    """
-    Class to handle Android devices, connected to PC
-    :ivar listeners: list of listeners - objects (implementing Listener interface), that are tracking devices' changes
-    :ivar serial_numbers: list of all connected devices' serial numbers
-    :ivar current_device: serial number of selected connected device
-    """
-    def __init__(self):
-        self.listeners = []
-        self.serial_numbers = []
-        self.current_device = None
+    """Class to handle Android devices, connected to PC
 
-    def device_selected(self):
-        """Return True if current device is still selected (selection is being cancelled on disconnect), else False
+    :ivar __listeners: list of listeners - objects (implementing Listener interface), that are tracking devices' changes
+    :ivar __serial_numbers: list of all connected devices' serial numbers
+    :ivar __current_device_id: serial number of selected connected device
+    """
+
+    def __init__(self):
+        self.__listeners = []
+        self.__serial_numbers = []
+        self.__current_device_id = None
+
+    def is_device_selected(self):
+        """Checks if current device is still connected to PC
+
+        :return: True if device is connected, else False
+        :rtype: Bool
         """
-        return self.current_device in list(np.asarray(self.serial_numbers).flatten())
+        return self.__current_device_id in self.__serial_numbers
 
     def has_devices(self):
-        """Returns True if there are connected devices, False if not"""
-        return len(self.serial_numbers) != 0
+        """ Checks if there are connected to PC devices
 
-    def get_device(self):
-        """Returns current working device
+        :return: True if there are connected devices, else False
+        :rtype: Bool
         """
-        return self.current_device if self.device_selected() else None
+        return len(self.__serial_numbers) != 0
 
-    def switch(self, number):
+    @property
+    def current_device(self):
+        """The unique serial number of selected device
+
+        :getter: returns serial number of current selected device
+        :type: String
+        """
+        return self.__current_device_id
+
+    def switch(self, device_number):
         """Switches working device to new device
 
-        :param number: number of a new working device
+        :param device_number: number of a new working device
+        :return: None
         """
-        self.current_device = number
-        if not self.device_selected():
-            self.current_device = None
+        self.__current_device_id = device_number
+        if not self.is_device_selected():
+            self.__current_device_id = None
 
+    @property
     def devices_list(self):
-        """Returns all connected devices
+        """List of all connected devices' serial numbers
+
+        :getter: returns list of all connected devices
+        :type: List
         """
-        return self.serial_numbers
+        return self.__serial_numbers
 
     def add_listener(self, listener):
         """Adds new listener
 
         :param listener: listener to be added
+        :return: None
         """
-        self.listeners.append(listener)
+        self.__listeners.append(listener)
 
     def update(self):
         """Updates list of all connected devices and notifies listeners
+
+        :return: None
         """
-        res = subprocess.check_output(
-            "adb devices",
-            shell=True)
-        prev_amount = len(self.serial_numbers)
-        output = list(filter(lambda x: x, res.decode('UTF-8').split('\n')))
-        self.serial_numbers = list(map(lambda x: [x[:x.find('\t')]], output[1:]))
-        if self.serial_numbers is []:
-            self.current_device = None
-        if len(self.serial_numbers) != prev_amount:
-            [listener.react() for listener in self.listeners]
+        res = exec_command('adb devices')
+        prev_state = self.__serial_numbers
+        output = [x for x in res.decode('UTF-8').split('\n') if x]
+        number_pattern = re.compile(r'(.*)\t')
+        serial_numbers = list(map(lambda x: number_pattern.findall(x), output[1:]))
+        # flatten list
+        self.__serial_numbers = list(chain.from_iterable(serial_numbers))
+
+        if len(self.__serial_numbers) == 0:
+            self.__current_device_id = None
+
+        if list_difference(self.__serial_numbers, prev_state):
+            for listener in self.__listeners:
+                listener.react()
