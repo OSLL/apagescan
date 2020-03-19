@@ -132,7 +132,7 @@ class MainView(QMainWindow, Listener):
         """Plots collected data to frame
         """
         try:
-            iterations = self.device_interaction.get_iterations()
+            iterations = self.device_interaction.iterations
             if iterations is not None:
                 for i in range(iterations):
                     self.plot_page_data(i)
@@ -217,9 +217,9 @@ class MainView(QMainWindow, Listener):
             self.set_buttons(pid=False, data=False, cgr=False, refc=False, highlight=False)
         self.set_buttons()
         self.update_data()
-        self.signals.pids_changed.emit(self.device_interaction.get_pid_list_all())
+        self.signals.pids_changed.emit(self.device_interaction.pid_list_all)
         self.signals.devices_changed.emit(self.devices_handler.devices_list)
-        self.signals.cgroup_changed.emit(self.device_interaction.get_cgroups_list())
+        self.signals.cgroup_changed.emit(self.device_interaction.cgroups_list)
 
     def show_state(self, state_index):
         """Shows data state
@@ -229,7 +229,7 @@ class MainView(QMainWindow, Listener):
         self.pages_graph.set_item(QtGui.QPixmap(f'resources/data/pictures/offsets/p{state_index}.png'))
         self.pages_stats_graph.set_item(QtGui.QPixmap(f'resources/data/pictures/barplot/b{state_index}.png'))
         self.set_buttons(prev=(self.active_state > 0),
-                         nxt=(self.active_state < self.device_interaction.get_iterations() - 1))
+                         nxt=(self.active_state < self.device_interaction.iterations - 1))
 
     @pyqtSlot()
     def collect_data(self):
@@ -297,7 +297,7 @@ class MainView(QMainWindow, Listener):
         self.show_state(self.active_state)
         self.set_buttons(data=True, refc=True, highlight=True)
         self.set_buttons(prev=(self.active_state > 0),
-                         nxt=(self.active_state < self.device_interaction.get_iterations() - 1),
+                         nxt=(self.active_state < self.device_interaction.iterations - 1),
                          play=True)
         self.is_data_collected = True
 
@@ -327,12 +327,12 @@ class MainView(QMainWindow, Listener):
         """Shows graphics of all iterations with a small interval
         """
         self.active_state = 0
-        for i in range(self.device_interaction.get_iterations()):  # simple implementation using sleep
+        for i in range(self.device_interaction.iterations):  # simple implementation using sleep
             self._ui.nextButton.clicked.emit()
             self.set_buttons(prev=False, nxt=False)
             sleep(0.5)
         self.set_buttons(prev=(self.active_state > 0),
-                         nxt=(self.active_state < self.device_interaction.get_iterations() - 1),
+                         nxt=(self.active_state < self.device_interaction.iterations - 1),
                          play=True)
 
     @pyqtSlot()
@@ -347,7 +347,7 @@ class MainView(QMainWindow, Listener):
     def mem_next_state(self):
         """Shows next iteration
         """
-        if self.active_state < self.device_interaction.get_iterations() - 1:
+        if self.active_state < self.device_interaction.iterations - 1:
             self.active_state += 1
             self.show_state(self.active_state)
 
@@ -377,7 +377,7 @@ class MainView(QMainWindow, Listener):
     def select_processes(self):
         """Opens menu for selecting pids for further analysis
         """
-        pids_dialog = SelectDialog(data_list=self.device_interaction.get_pid_list_all(),
+        pids_dialog = SelectDialog(data_list=self.device_interaction.pid_list_all,
                                    label='Select pids',
                                    has_select_all=True,
                                    parent=self)
@@ -417,7 +417,7 @@ class MainView(QMainWindow, Listener):
     def select_processes_cgroup(self):
         """Shows tree of processes in cgroup
         """
-        tree_dialog = TreeDialog(self.device_interaction.get_cgroups_list())
+        tree_dialog = TreeDialog(self.device_interaction.cgroups_list)
         transfer_data_facade = TreeDialogFacade(self.device_interaction, tree_dialog)
         self.signals.cgroup_changed.connect(tree_dialog.update)
         tree_dialog.signals.send_data.connect(self.set_active_pids)

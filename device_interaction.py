@@ -175,121 +175,149 @@ class DeviceInteraction:
     """
     Class for interaction with Android device and collection of device's running processes' pagedata
 
-    :ivar device: serial number of connected android device
-    :ivar page_data: processes' memory pagedata
-    :ivar present_page_data: processes' present memory pagedata
-    :ivar swapped_page_data: processes' swapped memory pagedata
-    :ivar error_pids: list of pids, for which data couldn't be collected
-    :ivar all_pid_list: list of all running processes' pids
-    :ivar cgroups_list: list of connected device's available cgroups
-    :ivar cgroup_pid_list: list of processes' pids  in chosen cgroup, running on connected device
+    :ivar __device: serial number of connected android device
+    :ivar __page_data: processes' memory pagedata
+    :ivar __present_page_data: processes' present memory pagedata
+    :ivar __swapped_page_data: processes' swapped memory pagedata
+    :ivar __error_pids: list of pids, for which data couldn't be collected
+    :ivar __pid_list_all: list of all running processes' pids on connected device
+    :ivar __pid_list_cgroup: list of processes' pids  in chosen cgroup, running on connected device
+    :ivar __cgroups_list: list of connected device's available cgroups
     :ivar iterations: number of iterations of data collecting
     """
     def __init__(self):
-        self.device = None
-        self.page_data = {}
-        self.present_page_data = {}
-        self.swapped_page_data = {}
-        self.error_pids = []
-        self.pid_list_all = []
-        self.pid_list_cgroup = []
-        self.cgroups_list = []
-        self.iterations = None
+        self.__device = None
+        self.__page_data = {}
+        self.__present_page_data = {}
+        self.__swapped_page_data = {}
+        self.__error_pids = []
+        self.__pid_list_all = []
+        self.__pid_list_cgroup = []
+        self.__cgroups_list = []
+        self.__iterations = None
 
-    def get_pid_list_all(self):
-        """Returns list of all pids from device
-        """
-        return self.pid_list_all
+    @property
+    def pid_list_all(self):
+        """List of all running processes' pids
 
-    def get_pid_list_cgroup(self):
-        """Returns list of all pids from cgroup
+        :getter: returns list of all pids from device
+        :type: List
         """
-        return self.pid_list_cgroup
+        return self.__pid_list_all
 
-    def get_cgroups_list(self):
-        """Returns list of all cgroups
+    @property
+    def pid_list_cgroup(self):
+        """List of processes' pids  in chosen cgroup
+
+        :getter: returns list of all pids from cgroup
+        :type: List
         """
-        return self.cgroups_list
+        return self.__pid_list_cgroup
+
+    @property
+    def cgroups_list(self):
+        """List of connected device's available cgroups
+
+        :getter: returns list of all available cgroups
+        :type: List
+        """
+        return self.__cgroups_list
 
     def get_page_data(self, iteration=None, present=False, swapped=False):
-        """Returns pages information
+        """Returns processes' memory pagedata
 
         :param iteration: number of collecting iteration
-        :param present: True if present data is required, False if not
-        :param swapped: True if swapped data is required, False if not
+        :param present: True if only present pages are required, False if not
+        :param swapped: True if only swapped pages are required, False if not
+
+        :return: returns processes' memory pagedata
+        :rtype: Dict
         """
         if not present and not swapped:
-            return self.page_data if iteration is None else self.page_data.get(iteration)
+            return self.__page_data if iteration is None else self.__page_data.get(iteration)
         elif present:
-            return self.present_page_data if iteration is None else self.present_page_data.get(iteration)
+            return self.__present_page_data if iteration is None else self.__present_page_data.get(iteration)
         else:
-            return self.swapped_page_data if iteration is None else self.swapped_page_data.get(iteration)
+            return self.__swapped_page_data if iteration is None else self.__swapped_page_data.get(iteration)
 
-    def get_iterations(self):
-        """Returns total amount of iterations
+    @property
+    def iterations(self):
+        """Number of iterations of data collecting
+
+        :getter: returns total amount of iterations
+        :type: Int
         """
-        return self.iterations
+        return self.__iterations
 
     def set_device(self, device):
         """Sets working device to get data
 
-        :param device: device serial number
+        :param device: device's serial number
+        :return: None
         """
-        self.device = device
+        self.__device = device
 
     def clear(self):
         """Removes collected data
+
+        :return: None
         """
-        self.pid_list_cgroup = []
-        self.pid_list_all = []
-        self.cgroups_list = []
-        self.error_pids = []
+        self.__pid_list_cgroup = []
+        self.__pid_list_all = []
+        self.__cgroups_list = []
+        self.__error_pids = []
 
     def set_iterations(self, iterations):
         """Sets total amount of iterations and initializes page_data structures
 
         :param iterations: amount to be set
+        :return: None
         """
-        self.iterations = iterations
+        self.__iterations = iterations
 
-        for i in range(self.iterations):
-            self.page_data.setdefault(i, OrderedDict())
-            self.present_page_data.setdefault(i, OrderedDict())
-            self.swapped_page_data.setdefault(i, OrderedDict())
+        for i in range(self.__iterations):
+            self.__page_data.setdefault(i, OrderedDict())
+            self.__present_page_data.setdefault(i, OrderedDict())
+            self.__swapped_page_data.setdefault(i, OrderedDict())
 
     def collect_cgroups_list(self):
         """Collects list of available cgroups from a device
+
+        :return: None
         """
-        self.cgroups_list = adb_cgroups_list(self.device)
+        self.__cgroups_list = adb_cgroups_list(self.__device)
 
     def collect_pid_list_all(self):
         """Collects list of all processes running on a device
+
+        :return: None
         """
         try:
-            pid_list_all = adb_collect_pid_list(self.device,
+            pid_list_all = adb_collect_pid_list(self.__device,
                                                 tool='get_pid_list',
                                                 filename='pid_list',
                                                 pull_path='pids_data',
                                                 group_name='')
-            self.pid_list_all = pid_list_all.tolist()
+            self.__pid_list_all = pid_list_all.tolist()
         except (SubprocessError, EmptyDataError):
-            self.pid_list_all = []
+            self.__pid_list_all = []
             raise
 
     def collect_pid_list_cgroup(self, group=''):
         """Collects list of all processes in a given cgroup running on a device
 
         :param group: cgroup name
+        :return: None
         """
         try:
-            pid_list_cgroup = adb_collect_pid_list(self.device,
+            pid_list_cgroup = adb_collect_pid_list(self.__device,
                                                    tool='read_cgroup',
                                                    filename='group_list',
                                                    pull_path='pids_data',
                                                    group_name=group)
-            self.pid_list_cgroup = pid_list_cgroup.tolist()
+            self.__pid_list_cgroup = pid_list_cgroup.tolist()
         except (SubprocessError, EmptyDataError):
-            self.pid_list_cgroup = []
+            self.__pid_list_cgroup = []
             raise
 
     def collect_page_data(self, cur_iteration, pid_list):
@@ -297,9 +325,11 @@ class DeviceInteraction:
 
         :param cur_iteration: current iteration of collecting
         :param pid_list: list of pids to collect data from
+        :return: list of pids, for which data couldn't be collected
+        :rtype: List
         """
-        page_data, present_data, swapped_data, error_pids = adb_collect_page_data(self.device, pid_list)
-        self.page_data[cur_iteration] = page_data
-        self.present_page_data[cur_iteration] = present_data
-        self.swapped_page_data[cur_iteration] = swapped_data
+        page_data, present_data, swapped_data, error_pids = adb_collect_page_data(self.__device, pid_list)
+        self.__page_data[cur_iteration] = page_data
+        self.__present_page_data[cur_iteration] = present_data
+        self.__swapped_page_data[cur_iteration] = swapped_data
         return error_pids

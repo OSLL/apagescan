@@ -22,4 +22,4 @@ class TreeDialogFacade(QObject):
         except EmptyDataError:
             QMessageBox.about(self, 'Error', 'Pid list unavailable')
 
-        self.dialog.display_data(self.data_collector.get_pid_list_cgroup())
+        self.dialog.display_data(self.data_collector.pid_list_cgroup)
