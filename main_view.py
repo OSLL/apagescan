@@ -214,7 +214,7 @@ class MainView(QMainWindow, Listener):
         super().react()
         if not self.devices_handler.is_device_selected():
             self.view_checked_pids([])
-            self.set_buttons(pid=False, data=False, refc=False, highlight=False)
+            self.set_buttons(pid=False, data=False, cgr=False, refc=False, highlight=False)
         self.set_buttons()
         self.update_data()
         self.signals.pids_changed.emit(self.device_interaction.get_pid_list_all())

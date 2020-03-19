@@ -10,6 +10,16 @@ from intervaltree import Interval, IntervalTree
 from device_interaction import exec_command
 
 
+def list_difference(first, second):
+    """Finds elements which create difference between two iterable objects
+
+    :param first: first iterable object
+    :param second: second iterable object
+    :return: list of different elements
+    """
+    return list(set(first).symmetric_difference(set(second)))
+
+
 def generate_color():
     """Generates random color
 
