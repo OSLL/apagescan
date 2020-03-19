@@ -16,6 +16,7 @@ def list_difference(first, second):
     :param first: first iterable object
     :param second: second iterable object
     :return: list of different elements
+    :rtype: List
     """
     return list(set(first).symmetric_difference(set(second)))
 
