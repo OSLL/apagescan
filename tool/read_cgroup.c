@@ -8,18 +8,16 @@
 #include <sys/uio.h>
 
 #define BUF_SIZE 256
+#define ENTRY_OFFSET 6 //offset is 6 because of the strlen("Name") or strlen("PPid") = 4 + ':' + '<space>' in status file
 #define PROC_DIRECTORY "/proc/"
 
 // usage example:
-// ./readPids <path/to/save/directory> <path/to/tasks/file>
+// ./read_cgroup <path/to/save/directory> <path/to/tasks/file>
 // example:
-// ./readPids . /sys/fs/cgroup/freezer/tasks
+// ./read_cgroup . /sys/fs/cgroup/freezer/tasks
 // will create file group_list.csv in current directory
-int main (int argc, char* argv[])
-{
-
-    if(argc < 3)
-    {
+int main (int argc, char* argv[]) {
+    if (argc < 3) {
         perror("Not enough parameters, provide path\n");
         exit(EXIT_FAILURE);
     }
@@ -30,7 +28,7 @@ int main (int argc, char* argv[])
     FILE* save_file = fopen(save_path, "w");
     char pid[BUF_SIZE];
 
-    FILE* tasksFile = fopen(argv[2], "r");
+    FILE* tasks_file = fopen(argv[2], "r");
 
     char open_path[BUF_SIZE] = "";
     char process_name[BUF_SIZE]= "";
@@ -38,23 +36,22 @@ int main (int argc, char* argv[])
     char tmp[BUF_SIZE]= "";
     char* entry;
 
-    while (fgets(pid, BUF_SIZE, tasksFile))
-    {
+    while (fgets(pid, BUF_SIZE, tasks_file)) {
         // remove \n at the end of pid
         pid[strcspn(pid, "\r\n")] = 0;
         strcat(open_path, PROC_DIRECTORY);
         strcat(open_path, pid);
         strcat(open_path, "/status");
 
-        FILE* statusFile = fopen(open_path, "r");
+        FILE* status_file = fopen(open_path, "r");
 
-        while(fgets(tmp, BUF_SIZE, statusFile)) //here we read line
-        {
+        while (fgets(tmp, BUF_SIZE, status_file)) {
             //collect data
             if((entry = strstr(tmp, "Name")))
-                sscanf(entry+6,"%[^\n]s", process_name); //offset is 6 because of the strlen("Name") = 4 + ':' + '<space>' in status file
+                sscanf(entry + ENTRY_OFFSET,"%[^\n]s", process_name);
+
             if((entry = strstr(tmp, "PPid")))
-                sscanf(entry+6,"%[^\n]", parent_pid); //same for "PPid"
+                sscanf(entry + ENTRY_OFFSET,"%[^\n]", parent_pid);
         }
 
         fprintf(save_file, "%s,%s,%s\n" ,pid, parent_pid, process_name);
@@ -64,10 +61,10 @@ int main (int argc, char* argv[])
         tmp[0] = '\0';
         open_path[0] = '\0';
 
-        fclose(statusFile);
+        fclose(status_file);
     }
 
     fclose(save_file);
-    fclose(tasksFile);
+    fclose(tasks_file);
+    return 0;
 }
-
