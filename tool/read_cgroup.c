@@ -8,6 +8,7 @@
 #include <sys/uio.h>
 
 #define BUF_SIZE 256
+#define ENTRY_OFFSET 6 //offset is 6 because of the strlen("Name") or strlen("PPid") = 4 + ':' + '<space>' in status file
 #define PROC_DIRECTORY "/proc/"
 
 // usage example:
@@ -47,10 +48,10 @@ int main (int argc, char* argv[]) {
         while (fgets(tmp, BUF_SIZE, status_file)) {
             //collect data
             if((entry = strstr(tmp, "Name")))
-                sscanf(entry + 6,"%[^\n]s", process_name); //offset is 6 because of the strlen("Name") = 4 + ':' + '<space>' in status file
+                sscanf(entry + ENTRY_OFFSET,"%[^\n]s", process_name);
 
             if((entry = strstr(tmp, "PPid")))
-                sscanf(entry + 6,"%[^\n]", parent_pid); //same for "PPid"
+                sscanf(entry + ENTRY_OFFSET,"%[^\n]", parent_pid);
         }
 
         fprintf(save_file, "%s,%s,%s\n" ,pid, parent_pid, process_name);
