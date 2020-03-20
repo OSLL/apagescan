@@ -1,4 +1,4 @@
-"""Contains functions to work with connected android device and DeviceInteraction class
+"""Contains functions to work with connected Android device and DeviceInteraction class
 
 Functions provide interface to interact with connected Android device and collect
 page by page memory data about processes running on a device. DeviceInteraction class
@@ -88,7 +88,7 @@ def read_page_data(pid):
 
 
 def adb_cgroups_list(device):
-    """Searches control groups in /proc/mounts file and returns paths to it's tasks files
+    """Searches for available cgroups in /proc/mounts file and collects their's tasks files paths
 
     :param device: device's serial number
     :return: list of paths to control groups' tasks files
@@ -105,8 +105,8 @@ def adb_collect_pid_list(device, tool, filename, pull_path, group_name):
     """Collect list of processes from device
 
     :param device: target device's serial number
-    :param tool: script name on android device (get_pid_list or read_cgroup)
-    :param filename: data filename on android device
+    :param tool: script name on Android device (get_pid_list or read_cgroup)
+    :param filename: data filename on Android device
     :param pull_path: path for data on PC
     :param group_name: control group to collect list of processes from; group_name='' for get_pid_list tool
     :return: list of processes like [[<pid>, <process full name>], [<pid>, <process full name>]...]
@@ -175,7 +175,7 @@ class DeviceInteraction:
     """
     Class for interaction with Android device and collection of device's running processes' pagedata
 
-    :ivar __device: serial number of connected android device
+    :ivar __device: serial number of connected Android device
     :ivar __page_data: processes' memory pagedata
     :ivar __present_page_data: processes' present memory pagedata
     :ivar __swapped_page_data: processes' swapped memory pagedata
