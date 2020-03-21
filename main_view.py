@@ -147,7 +147,7 @@ class MainView(QMainWindow, Listener):
             self.set_table_color(i)
 
     def display_page_data(self):
-        """Plots collected data to frame
+        """Plots all memory state graphics
 
         :return: None
         """
@@ -340,7 +340,7 @@ class MainView(QMainWindow, Listener):
         self.is_data_collected = True
 
     def plot_page_data(self, iteration):
-        """Plots graphics of a given iteration
+        """Plots graphics of memory state for given iteration using collected data
 
         :param iteration: iteration of memory state to be shown
         :return: None
@@ -536,7 +536,7 @@ class MainView(QMainWindow, Listener):
         self.set_table_color(pid_table_index)
 
     def set_table_color(self, pid_table_index):
-        """Sets pid's color in table widget
+        """Sets pid's color in TableWidget
 
         :return: None
         """
