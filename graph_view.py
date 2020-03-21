@@ -55,10 +55,11 @@ def barplot_pids_pagemap(page_data, highlighted_pids, iteration=''):
 
 
 def get_flags_count(data, column):
-    """From data-dataFrame forms the dict for specific flag. Each flag data is in the certain column
+    """From dataFrame (page by page data) creates dict, containing number of times pages contained particular flag.
+     Flags are stored in dataFrame columns.
 
     :param data: dataFrame containing info about each page of process
-    :param column: number of column in data-dataFrame.
+    :param column: number of column in dataFrame.
     :return: dict like {0: <Number of 0-values in that column>, 1: <Number of 1-values in that column>}
     :rtype: Dict
     """
