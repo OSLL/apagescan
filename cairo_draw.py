@@ -5,6 +5,12 @@ import cairo
 
 #  page_data - dict like {pid1: pid1_page_data, pid2: pid1_page_data}
 def plot_pids_pagemap(page_data, colors, index):
+    """Creates plot displaying page map and saves the image to '.png'
+
+    :param page_data: dictionary contains data like {pid1: pid1_page_data, pid2: pid1_page_data}
+    :param colors: color list
+    :param index: number of iteration of data collecting
+    """
     width = 2200
     length = 1251  # enough to 2GB of ram and 20mb of swap
     swap_offset = 1202  # offset to draw swap pages, it is 1202 and not 1200 because black line height is 2

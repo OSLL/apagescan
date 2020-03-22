@@ -4,6 +4,13 @@ from PyQt5.QtWidgets import QGraphicsView
 
 
 class PhotoViewer(QGraphicsView):
+    """Widget for displaying plotted graphs on QGraphicsScene
+    :ivar scene: QGraphicsScene to draw pictures
+    :ivar pixmap_content: pixmap containing picture's representation
+    :ivar zoom: zoom ratio
+    :ivar has_content: flag indicating if picture is set
+    :ivar has_zoom: flag indicating if zoom is enabled
+    """
     def __init__(self, need_zoom=False, parent=None):
         super(PhotoViewer, self).__init__(parent)
         self.scene = QtWidgets.QGraphicsScene(self)

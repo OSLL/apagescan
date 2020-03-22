@@ -9,6 +9,11 @@ from utilities import list_difference
 
 
 class TreeDialog(SelectDialog):
+    """Widget for displaying data (represented as list) in tree form
+    aside from tree view, dialog inherits SelectDialog, therefore provides displaying
+    data in table form and row selection
+    """
+
     def __init__(self, cgroup_list):
         self.cgroup_list = cgroup_list
         self._ui = None

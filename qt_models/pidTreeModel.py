@@ -4,6 +4,9 @@ from tree_dialog.pidNode import PidNode
 
 
 class PidTreeModel(QAbstractItemModel):
+    """Model for pid data representation in a QTreeView widget, contains processes' tree
+    """
+
     def __init__(self, parent=None):
         super(PidTreeModel, self).__init__(parent)
 

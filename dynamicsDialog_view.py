@@ -6,6 +6,9 @@ from qt_ui.dynamicsDialog_ui import Ui_DynamicsDialog
 
 
 class DynamicsDialog(QDialog):
+    """Widget provides input of two values: total_time - limit of time that all data collection would take,
+    and iteration_time - time to wait between iterations of data collection
+    """
     def __init__(self):
         super(DynamicsDialog, self).__init__()
         self._ui = Ui_DynamicsDialog()

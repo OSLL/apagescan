@@ -1,4 +1,3 @@
-import os
 from subprocess import CalledProcessError
 
 from PyQt5.QtCore import QObject, pyqtSlot
@@ -6,8 +5,9 @@ from PyQt5.QtWidgets import QMessageBox
 from pandas.errors import EmptyDataError
 
 
-# facade class to handle transfer data between device and TreeDialog instance
 class TreeDialogFacade(QObject):
+    """Facade class to handle transfer data between connected device and TreeDialog instance
+    """
     def __init__(self, device_interaction, tree_dialog):
         super().__init__()
         self.dialog = tree_dialog
@@ -22,4 +22,4 @@ class TreeDialogFacade(QObject):
         except EmptyDataError:
             QMessageBox.about(self, 'Error', 'Pid list unavailable')
 
-        self.dialog.display_data(self.data_collector.get_pid_list_cgroup())
+        self.dialog.display_data(self.data_collector.pid_list_cgroup)

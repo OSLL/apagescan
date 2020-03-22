@@ -4,6 +4,15 @@ from matplotlib.figure import Figure
 
 
 def barplot_pids_pagemap(page_data, highlighted_pids, iteration=''):
+    """Displays 2 bar plot for each pid marked as highlighted and saves them to .png
+    * 1 bar is [swapped % |     clean %     |    dirty %  ]
+    * 2 bar is [swapped % | not anonymous % | anonymous % ]
+
+    :param page_data: ordered dict with pid as key, and data frame, containing info about each page as value
+    :param highlighted_pids: list of pids to be shown
+    :param iteration: number of iteration of data collecting
+    :return: None
+    """
     # TODO Remove hardcoded values, use values depending on widget size
     width = 13
     height = 2
@@ -46,12 +55,27 @@ def barplot_pids_pagemap(page_data, highlighted_pids, iteration=''):
 
 
 def get_flags_count(data, column):
+    """From dataFrame (page by page data) creates dict, containing number of times pages contained particular flag.
+     Flags are stored in dataFrame columns.
+
+    :param data: dataFrame containing info about each page of process
+    :param column: number of column in dataFrame.
+    :return: dict like {0: <Number of 0-values in that column>, 1: <Number of 1-values in that column>}
+    :rtype: Dict
+    """
     unique, counts = np.unique(data[column], return_counts=True)
     return dict(zip(unique, counts))
 
 
-#  []_flag - dict like {0: number of 0, 1: number of 1}
 def get_percentage_values(total_pages, present_flag, any_flag):
+    """Calculate width of the bar plot in percentage ratio format
+
+    :param total_pages: the total number of pages for process
+    :param present_flag: dict formed by get_flags_count(data, column) function. {0: <number of swapped pages>, 1: <number of present pages>}
+    :param any_flag: dict formed by get_flags_count(data, column) function. (ex. {0: <number of clean pages>, 1: <number of dirty pages>})
+    :return: list of the widths for the bar plot (ex. [10, 50, 40]: 10% + 50% + 40% = 100%)
+    :rtype: List
+    """
     flags_count_data = [present_flag.get(0, 0),  # swapped
                         present_flag.get(1, 0) - any_flag.get(1, 0),  # present - any
                         any_flag.get(1, 0)]
@@ -59,5 +83,13 @@ def get_percentage_values(total_pages, present_flag, any_flag):
 
 
 def plot_bar(ax, bar_data, y_offset, colors):
+    """Displays a horizontal bar plot
+
+    :param ax: axes instance in the coordinate system
+    :param bar_data: the widths of the bars, formed by def get_percentage_values(total_pages, present_flag, any_flag)
+    :param y_offset: the heights of the bars in y axes in the coordinate system. 0 offset - the highest bar.
+    :param colors: list of colors for bar data
+    :return: None
+    """
     for i, bar_value in enumerate(bar_data):
         ax.barh(y=y_offset, width=bar_value, left=sum(bar_data[:i]), color=colors[i])

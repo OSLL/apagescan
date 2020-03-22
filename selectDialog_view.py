@@ -7,6 +7,10 @@ from qt_ui.selectDialog_ui import Ui_SelectDialog
 
 
 class SelectDialog(QDialog):
+    """Widget for displaying data (represented as list) in table form
+    rows can be selected using checkboxes and wrapped in list, which can be accessed
+    with get_checked() method
+    """
     def __init__(self, data_list, label='', close_on_detach=True, has_select_all=False, parent=None):
         super(SelectDialog, self).__init__(parent)
         self.data_list = []

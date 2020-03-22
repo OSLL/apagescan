@@ -24,6 +24,22 @@ from utilities import *
 
 
 class MainView(QMainWindow, Listener):
+    """Main application class
+
+    :ivar devices_handler: DeviceHandler instance, handles connected devices
+    :ivar device_interaction: DeviceInteraction instance, provides data collection from connected device
+    :ivar signals: custom signals for interaction with dialogs
+    :ivar pages_stats_graph: widget for displaying pages percentage stats graph
+    :ivar pages_graph: widget for displaying memory state graph
+    :ivar timer: app clock, used for updating once per certain period
+    :ivar time: app time
+    :ivar active_pids: list containing pids for memory inspection
+    :ivar active_pids_len: length of active pids list
+    :ivar active_state: number of current iteration of memory state's data collection
+    :ivar iteration_time: time to wait between iterations of data collection
+    :ivar total_time: limit of time that all data collection would take
+    :ivar is_data_collected: flag indicating if data has been collected at the moment
+    """
     def __init__(self):
         super().__init__()
         self._ui = Ui_MainWindow()
@@ -75,6 +91,10 @@ class MainView(QMainWindow, Listener):
         self.is_data_collected = False
 
     def call_menu(self, point):
+        """Calls context menu for a chosen pid in a table
+
+        :return: None
+        """
         if self.active_state == -1:
             return
         menu = QtWidgets.QMenu()
@@ -85,10 +105,18 @@ class MainView(QMainWindow, Listener):
         menu.exec(self._ui.tableWidget.mapToGlobal(point))
 
     def show(self):
+        """Shows application widget
+
+        :return: None
+        """
         super().show()
         self._ui.devicesButton.clicked.emit()
 
     def update_data(self):
+        """Updates data such as pid list from a device with a small time interval
+
+        :return: None
+        """
         self.device_interaction.clear()
         if not self.devices_handler.is_device_selected():
             return
@@ -101,10 +129,15 @@ class MainView(QMainWindow, Listener):
         except EmptyDataError:
             self.show_msg('Error', 'Pid list unavailable')
         finally:
-            clean_tmp_data_from_device(device=self.devices_handler.get_device(), remove_page_data=False)
+            clean_tmp_data_from_device(device=self.devices_handler.current_device, remove_page_data=False)
             clean_tmp_data(remove_page_data=False, remove_pictures_data=False)
 
     def generate_pid_colors(self, update_active_pids=True):
+        """Generates colors for pid's representation on a plot
+
+        :param update_active_pids: true if active pids colors has to be re-generated, false if not
+        :return: None
+        """
         for i in range(self.active_pids_len):
             if self.active_pids[i]['corrupted']:
                 self.active_pids[i]['color'] = QColor(Qt.transparent)
@@ -114,23 +147,35 @@ class MainView(QMainWindow, Listener):
             self.set_table_color(i)
 
     def display_page_data(self):
+        """Plots all memory state graphics
+
+        :return: None
+        """
         try:
-            iterations = self.device_interaction.get_iterations()
+            iterations = self.device_interaction.iterations
             if iterations is not None:
                 for i in range(iterations):
                     self.plot_page_data(i)
         except AttributeError:
             pass  # no data collected yet
         finally:
-            clean_tmp_data_from_device(device=self.devices_handler.get_device(), remove_pids_data=False)
+            clean_tmp_data_from_device(device=self.devices_handler.current_device, remove_pids_data=False)
             clean_tmp_data(remove_pictures_data=False, remove_pids_data=False)
 
     def refresh_colors(self):
+        """Generates new colors for pids on a plot
+
+        :return: None
+        """
         self.generate_pid_colors()
         self.display_page_data()
         self.show_state(self.active_state)
 
     def view_checked_pids(self, checked_pids):
+        """Handles checked pids for further actions
+
+        :param checked_pids: list of pids
+        """
         self._ui.tableWidget.clear()
         row = len(checked_pids)
         col = 2
@@ -165,6 +210,10 @@ class MainView(QMainWindow, Listener):
         self.is_data_collected = False
 
     def timer_event(self):
+        """Calls update method with small time interval
+
+        :return: None
+        """
         self.time = self.time.addSecs(1)
         self.timer.start(1000)
         self.devices_handler.update()
@@ -172,33 +221,58 @@ class MainView(QMainWindow, Listener):
             self.react()
 
     def show_msg(self, msg_type, msg):
+        """Shows custom message
+
+        :param msg_type: type of message to be shown
+        :param msg: text of message
+        :return: None
+        """
         QGuiApplication.restoreOverrideCursor()
         QMessageBox.about(self, msg_type, msg)
 
     def closeEvent(self, event):
-        clean_tmp_data_from_device(device=self.devices_handler.get_device())
+        """Responds to window close request
+
+        :param event: close request
+        :return: None
+        """
+        clean_tmp_data_from_device(device=self.devices_handler.current_device)
         clean_tmp_data()
         event.accept()
 
     def react(self):
+        """Updates internal data  - pid lists, cgroup list, connected devices
+        and changes GUI state according to updated data
+
+        :return: None
+        """
         super().react()
         if not self.devices_handler.is_device_selected():
             self.view_checked_pids([])
             self.set_buttons(pid=False, data=False, cgr=False, refc=False, highlight=False)
         self.set_buttons()
         self.update_data()
-        self.signals.pids_changed.emit(self.device_interaction.get_pid_list_all())
-        self.signals.devices_changed.emit(self.devices_handler.devices_list())
-        self.signals.cgroup_changed.emit(self.device_interaction.get_cgroups_list())
+        self.signals.pids_changed.emit(self.device_interaction.pid_list_all)
+        self.signals.devices_changed.emit(self.devices_handler.devices_list)
+        self.signals.cgroup_changed.emit(self.device_interaction.cgroups_list)
 
     def show_state(self, state_index):
+        """Displays current memory state visualization on pages_graph
+
+        :param state_index: index of memory state to be shown
+        :return: None
+        """
         self.pages_graph.set_item(QtGui.QPixmap(f'resources/data/pictures/offsets/p{state_index}.png'))
         self.pages_stats_graph.set_item(QtGui.QPixmap(f'resources/data/pictures/barplot/b{state_index}.png'))
         self.set_buttons(prev=(self.active_state > 0),
-                         nxt=(self.active_state < self.device_interaction.get_iterations() - 1))
+                         nxt=(self.active_state < self.device_interaction.iterations - 1))
 
     @pyqtSlot()
     def collect_data(self):
+        """Runs scripts on a device, pulls data to application, plots and shows graphs
+
+        :return: None
+        """
         if not self.devices_handler.is_device_selected():
             self.show_msg('Error', 'No attached devices')
             return
@@ -261,11 +335,16 @@ class MainView(QMainWindow, Listener):
         self.show_state(self.active_state)
         self.set_buttons(data=True, refc=True, highlight=True)
         self.set_buttons(prev=(self.active_state > 0),
-                         nxt=(self.active_state < self.device_interaction.get_iterations() - 1),
+                         nxt=(self.active_state < self.device_interaction.iterations - 1),
                          play=True)
         self.is_data_collected = True
 
     def plot_page_data(self, iteration):
+        """Plots graphics of memory state for given iteration using collected data
+
+        :param iteration: iteration of memory state to be shown
+        :return: None
+        """
         color_list = []
         highlighted_pid_list = []
         for pid in list(filter(lambda el: el['corrupted'] is False, self.active_pids)):
@@ -284,29 +363,47 @@ class MainView(QMainWindow, Listener):
 
     @pyqtSlot()
     def mem_dynamics(self):
+        """Shows graphics of all memory state iterations with a small interval
+
+        :return: None
+        """
         self.active_state = 0
-        for i in range(self.device_interaction.get_iterations()):  # simple implementation using sleep
+        for i in range(self.device_interaction.iterations):  # simple implementation using sleep
             self._ui.nextButton.clicked.emit()
             self.set_buttons(prev=False, nxt=False)
             sleep(0.5)
         self.set_buttons(prev=(self.active_state > 0),
-                         nxt=(self.active_state < self.device_interaction.get_iterations() - 1),
+                         nxt=(self.active_state < self.device_interaction.iterations - 1),
                          play=True)
 
     @pyqtSlot()
     def mem_prev_state(self):
+        """Shows previous iteration of memory state
+
+        :return: None
+        """
         if self.active_state > 0:
             self.active_state -= 1
             self.show_state(self.active_state)
 
     @pyqtSlot()
     def mem_next_state(self):
-        if self.active_state < self.device_interaction.get_iterations() - 1:
+        """Shows next iteration of memory state
+
+        :return: None
+        """
+        if self.active_state < self.device_interaction.iterations - 1:
             self.active_state += 1
             self.show_state(self.active_state)
 
     @pyqtSlot(object)
     def set_active_pids(self, data):
+        """Sets active pid list from given data and updates GUI state
+
+        :param data:
+        :return: None
+        """
+
         self.view_checked_pids(data)
         self.set_buttons(data=True if self.active_pids_len > 0 else False,
                          refc=False,
@@ -314,14 +411,24 @@ class MainView(QMainWindow, Listener):
 
     @pyqtSlot(object)
     def set_collection_time(self, data):
+        """Sets iteration_time and total_time with a given data
+
+        :param data: tuple(iteration_time, total_time)
+        :return: None
+        """
         self.iteration_time = data[0] if data is not None else -1
         self.total_time = data[1] if data is not None else -1
 
     @pyqtSlot(object)
     def set_device_data(self, data):
+        """Sets connected device's serial number
+
+        :param data: [[device_number]]
+        :return: None
+        """
         if len(data) > 0:
             self.devices_handler.switch(str(data[0][0]))
-            self.device_interaction.set_device(self.devices_handler.get_device())
+            self.device_interaction.set_device(self.devices_handler.current_device)
             self.set_buttons(pid=True, cgr=True)
 
         self._ui.statusBar.showMessage(f'{data[0][0] if len(data) > 0 else "No"} device was connected')
@@ -329,7 +436,11 @@ class MainView(QMainWindow, Listener):
 
     @pyqtSlot()
     def select_processes(self):
-        pids_dialog = SelectDialog(data_list=self.device_interaction.get_pid_list_all(),
+        """Opens menu for pids' selection for memory inspection
+
+        :return: None
+        """
+        pids_dialog = SelectDialog(data_list=self.device_interaction.pid_list_all,
                                    label='Select pids',
                                    has_select_all=True,
                                    parent=self)
@@ -339,7 +450,11 @@ class MainView(QMainWindow, Listener):
 
     @pyqtSlot()
     def select_devices(self):
-        devices_dialog = SelectDialog(data_list=self.devices_handler.devices_list(),
+        """Opens menu for selection of device to collect data from
+
+        :return: None
+        """
+        devices_dialog = SelectDialog(data_list=self.devices_handler.devices_list,
                                       label='Select devices',
                                       close_on_detach=False,
                                       parent=self)
@@ -349,6 +464,10 @@ class MainView(QMainWindow, Listener):
 
     @pyqtSlot()
     def show_pid_info(self):
+        """Shows pid's page by page memory information
+
+        :return: None
+        """
         pid_index = self._ui.tableWidget.selectedIndexes()[0].row()
         pid = self.active_pids[pid_index]['pid']
         if self.active_pids[pid_index]['corrupted']:
@@ -363,7 +482,11 @@ class MainView(QMainWindow, Listener):
 
     @pyqtSlot()
     def select_processes_cgroup(self):
-        tree_dialog = TreeDialog(self.device_interaction.get_cgroups_list())
+        """Shows tree of processes from chosen cgroup
+
+        :return: None
+        """
+        tree_dialog = TreeDialog(self.device_interaction.cgroups_list)
         transfer_data_facade = TreeDialogFacade(self.device_interaction, tree_dialog)
         self.signals.cgroup_changed.connect(tree_dialog.update)
         tree_dialog.signals.send_data.connect(self.set_active_pids)
@@ -371,6 +494,10 @@ class MainView(QMainWindow, Listener):
         tree_dialog.exec_()
 
     def set_buttons(self, pid=None, data=None, nxt=None, prev=None, play=None, cgr=None, refc=None, highlight=None):
+        """Sets GUI buttons' state - enabled of disabled, according to given flags
+
+        :return: None
+        """
         self._ui.pidsButton.setEnabled(pid if pid is not None else self._ui.pidsButton.isEnabled())
         self._ui.dataButton.setEnabled(data if data is not None else self._ui.dataButton.isEnabled())
         self._ui.nextButton.setEnabled(nxt if nxt is not None else self._ui.nextButton.isEnabled())
@@ -384,6 +511,10 @@ class MainView(QMainWindow, Listener):
             highlight if highlight is not None else self._ui.highlightButton.isEnabled())
 
     def change_pid_color(self):
+        """Changes color of a pid in graphical representation
+
+        :return: None
+        """
         index = self._ui.tableWidget.selectedIndexes()[0].row()
         if self.active_pids[index]['corrupted']:
             return
@@ -394,13 +525,21 @@ class MainView(QMainWindow, Listener):
         self.display_page_data()
         self.show_state(self.active_state)
 
-    # edit alpha component for every picture for given index of pid
     def edit_alpha(self, pid_table_index, alpha):
+        """Sets alpha component of a pid
+
+        :param pid_table_index: pid's index in table
+        :param alpha: alpha component value
+        :return: None
+        """
         self.active_pids[pid_table_index]['color'].setAlpha(alpha)
         self.set_table_color(pid_table_index)
 
-    # set color components according to table
     def set_table_color(self, pid_table_index):
+        """Sets pid's color in TableWidget
+
+        :return: None
+        """
         columns = 2
         for col in range(columns):
             self._ui.tableWidget.item(pid_table_index, col).setBackground(
@@ -411,6 +550,10 @@ class MainView(QMainWindow, Listener):
 
     @pyqtSlot()
     def highlight_pids(self):
+        """Highlights selected pids on a pages_graph widget
+
+        :return: None
+        """
         for index in range(self.active_pids_len):
             if self._ui.tableWidget.item(index, 0).checkState() == Qt.Unchecked:
                 self.active_pids[index]['highlighted'] = False

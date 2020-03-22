@@ -2,6 +2,8 @@ from PyQt5.QtCore import QAbstractTableModel, Qt, QVariant
 
 
 class PagemapModel(QAbstractTableModel):
+    """Model for tableView containing pid's info data
+    """
     def __init__(self, pages_list):
         super(PagemapModel, self).__init__()
         self.pages_list = pages_list
