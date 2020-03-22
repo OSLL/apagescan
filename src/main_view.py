@@ -14,7 +14,7 @@ from src.graph_view import barplot_pids_pagemap
 from src.handling.device_handler import DeviceHandler
 from src.handling.listener import Listener
 from src.pages_graphics import plot_pids_pagemap
-from src.picture_view import PhotoViewer
+from src.picture_viewer import PictureViewer
 from src.qt_ui.mainWindow_ui import Ui_MainWindow
 from src.qt_dialogs.selectDialog_view import SelectDialog
 from src.qt_dialogs.tableDialog_view import TableDialog
@@ -52,12 +52,12 @@ class MainView(QMainWindow, Listener):
         self.set_buttons(pid=False, data=False, nxt=False, prev=False, play=False, cgr=False, refc=False,
                          highlight=False)
 
-        self.pages_stats_graph = PhotoViewer(need_zoom=False, parent=self._ui.graphicsBar)
+        self.pages_stats_graph = PictureViewer(need_zoom=False, parent=self._ui.graphicsBar)
         layout = QVBoxLayout(self._ui.graphicsBar)
         layout.addWidget(self.pages_stats_graph)
         self._ui.graphicsBar.setStyleSheet("background-color: whitesmoke")
 
-        self.pages_graph = PhotoViewer(need_zoom=True, parent=self._ui.graphicsPresent)
+        self.pages_graph = PictureViewer(need_zoom=True, parent=self._ui.graphicsPresent)
         layout = QVBoxLayout(self._ui.graphicsPresent)
         layout.addWidget(self.pages_graph)
         self._ui.graphicsPresent.setStyleSheet("background-color: whitesmoke")
