@@ -18,8 +18,8 @@ from src.picture_viewer import PictureViewer
 from src.qt_ui.mainwindow_ui import Ui_MainWindow
 from src.qt_dialogs.select_dialog import SelectDialog
 from src.qt_dialogs.table_dialog import TableDialog
-from src.qt_dialogs.tree_dialog.tree_dialog_facade import TreeDialogFacade
-from src.qt_dialogs.tree_dialog.tree_dialog import TreeDialog
+from src.qt_dialogs.tree_dialog_facade import TreeDialogFacade
+from src.qt_dialogs.tree_dialog import TreeDialog
 from src.utilities import *
 
 
