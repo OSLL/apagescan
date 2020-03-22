@@ -9,17 +9,17 @@ from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QMessageBox, QAbstractItem
 
 from src.custom_signals import CustomSignals
 from src.device_interaction import *
-from src.qt_dialogs.dynamicsDialog_view import DynamicsDialog
+from src.qt_dialogs.dynamics_dialog import DynamicsDialog
 from src.graph_view import barplot_pids_pagemap
 from src.handling.device_handler import DeviceHandler
 from src.handling.listener import Listener
 from src.pages_graphics import plot_pids_pagemap
 from src.picture_viewer import PictureViewer
-from src.qt_ui.mainWindow_ui import Ui_MainWindow
-from src.qt_dialogs.selectDialog_view import SelectDialog
-from src.qt_dialogs.tableDialog_view import TableDialog
-from src.qt_dialogs.tree_dialog.treeDialogFacade import TreeDialogFacade
-from src.qt_dialogs.tree_dialog.treeDialog_view import TreeDialog
+from src.qt_ui.mainwindow_ui import Ui_MainWindow
+from src.qt_dialogs.select_dialog import SelectDialog
+from src.qt_dialogs.table_dialog import TableDialog
+from src.qt_dialogs.tree_dialog.tree_dialog_facade import TreeDialogFacade
+from src.qt_dialogs.tree_dialog.tree_dialog import TreeDialog
 from src.utilities import *
 
 
