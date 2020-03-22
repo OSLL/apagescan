@@ -3,7 +3,7 @@ from PyQt5.QtCore import Qt, pyqtSlot
 from PyQt5.QtWidgets import QDialog, QTableWidgetItem, QAbstractItemView
 
 from src.custom_signals import CustomSignals
-from src.qt_ui.selectDialog_ui import Ui_SelectDialog
+from src.qt_ui.select_dialog_ui import Ui_SelectDialog
 
 
 class SelectDialog(QDialog):

@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QDialog
 
 from src.qt_models.pagemap_model import PagemapModel
-from src.qt_ui.tableDialog_ui import Ui_TableDialog
+from src.qt_ui.table_dialog_ui import Ui_TableDialog
 
 
 class TableDialog(QDialog):

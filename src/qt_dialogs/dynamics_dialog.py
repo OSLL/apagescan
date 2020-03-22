@@ -2,7 +2,7 @@ from PyQt5 import QtGui, QtCore
 from PyQt5.QtWidgets import QDialog
 
 from src.custom_signals import CustomSignals
-from src.qt_ui.dynamicsDialog_ui import Ui_DynamicsDialog
+from src.qt_ui.dynamics_dialog_ui import Ui_DynamicsDialog
 
 
 class DynamicsDialog(QDialog):

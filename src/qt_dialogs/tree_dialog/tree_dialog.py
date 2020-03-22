@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import QAbstractItemView, QTableWidget
 from src.custom_signals import CustomSignals
 from src.qt_dialogs.select_dialog import SelectDialog
 from src.qt_models.pid_tree_model import PidTreeModel
-from src.qt_ui.treeDialog_ui import Ui_TreeDialog
+from src.qt_ui.tree_dialog_ui import Ui_TreeDialog
 
 from src.utilities import list_difference
 
