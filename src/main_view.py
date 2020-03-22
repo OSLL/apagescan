@@ -8,12 +8,12 @@ from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QMessageBox, QAbstractItem
     QColorDialog, QTableWidget
 
 from src.custom_signals import CustomSignals
-from src.device_interaction import *
+from src.device.interaction import *
 from src.qt_dialogs.dynamics_dialog import DynamicsDialog
-from src.barplot_graphics import barplot_pids_pagemap
-from src.handling.device_handler import DeviceHandler
-from src.handling.listener import Listener
-from src.pages_graphics import plot_pids_pagemap
+from src.graphics.barplot_graphics import barplot_pids_pagemap
+from src.device.handler import DeviceHandler
+from src.device.listener import Listener
+from src.graphics.pages_graphics import plot_pids_pagemap
 from src.picture_viewer import PictureViewer
 from src.qt_ui.mainwindow_ui import Ui_MainWindow
 from src.qt_dialogs.select_dialog import SelectDialog
