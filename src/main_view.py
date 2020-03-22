@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QMessageBox, QAbstractItem
 from src.custom_signals import CustomSignals
 from src.device_interaction import *
 from src.qt_dialogs.dynamics_dialog import DynamicsDialog
-from src.graph_view import barplot_pids_pagemap
+from src.barplot_graphics import barplot_pids_pagemap
 from src.handling.device_handler import DeviceHandler
 from src.handling.listener import Listener
 from src.pages_graphics import plot_pids_pagemap
