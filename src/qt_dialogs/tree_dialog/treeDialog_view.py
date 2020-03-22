@@ -1,11 +1,11 @@
 from PyQt5.QtWidgets import QAbstractItemView, QTableWidget
 
-from custom_signals import CustomSignals
-from selectDialog_view import SelectDialog
-from qt_models.pidTreeModel import PidTreeModel
-from qt_ui.treeDialog_ui import Ui_TreeDialog
+from src.custom_signals import CustomSignals
+from src.qt_dialogs.selectDialog_view import SelectDialog
+from src.qt_models.pidTreeModel import PidTreeModel
+from src.qt_ui.treeDialog_ui import Ui_TreeDialog
 
-from utilities import list_difference
+from src.utilities import list_difference
 
 
 class TreeDialog(SelectDialog):

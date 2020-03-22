@@ -2,7 +2,7 @@ from collections import Counter
 
 from cairo import ImageSurface, Context, Format
 
-from utilities import create_regions_map
+from src.utilities import create_regions_map
 
 RAM_SIZE = 2 ** 31  # 2 gb
 SWAP_SIZE = 20 * (2 ** 20)  # 20 mb

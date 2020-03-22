@@ -1,6 +1,6 @@
 from PyQt5.QtCore import Qt, QAbstractItemModel, QVariant, QModelIndex
 
-from tree_dialog.pidNode import PidNode
+from src.qt_dialogs.tree_dialog.pidNode import PidNode
 
 
 class PidTreeModel(QAbstractItemModel):

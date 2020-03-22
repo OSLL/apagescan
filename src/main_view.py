@@ -7,20 +7,20 @@ from PyQt5.QtGui import QGuiApplication
 from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QMessageBox, QAbstractItemView, QProgressBar, QTableWidgetItem, \
     QColorDialog, QTableWidget
 
-from custom_signals import CustomSignals
-from device_interaction import *
-from dynamicsDialog_view import DynamicsDialog
-from graph_view import barplot_pids_pagemap
-from handling.device_handler import DeviceHandler
-from handling.listener import Listener
-from pages_graphics import plot_pids_pagemap
-from picture_view import PhotoViewer
-from qt_ui.mainWindow_ui import Ui_MainWindow
-from selectDialog_view import SelectDialog
-from tableDialog_view import TableDialog
-from tree_dialog.treeDialogFacade import TreeDialogFacade
-from tree_dialog.treeDialog_view import TreeDialog
-from utilities import *
+from src.custom_signals import CustomSignals
+from src.device_interaction import *
+from src.qt_dialogs.dynamicsDialog_view import DynamicsDialog
+from src.graph_view import barplot_pids_pagemap
+from src.handling.device_handler import DeviceHandler
+from src.handling.listener import Listener
+from src.pages_graphics import plot_pids_pagemap
+from src.picture_view import PhotoViewer
+from src.qt_ui.mainWindow_ui import Ui_MainWindow
+from src.qt_dialogs.selectDialog_view import SelectDialog
+from src.qt_dialogs.tableDialog_view import TableDialog
+from src.qt_dialogs.tree_dialog.treeDialogFacade import TreeDialogFacade
+from src.qt_dialogs.tree_dialog.treeDialog_view import TreeDialog
+from src.utilities import *
 
 
 class MainView(QMainWindow, Listener):
