@@ -55,7 +55,7 @@ Open terminal and follow these steps:
 3. Connect your device (**must be rooted and unlocked**)
 
     ```bash
-    cd tool/
+    cd data_tool/
     make
     ```
 
