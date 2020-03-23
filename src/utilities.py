@@ -7,7 +7,7 @@ from PyQt5.QtCore import QTimer, QEventLoop
 from PyQt5.QtGui import QColor
 from intervaltree import Interval, IntervalTree
 
-from device_interaction import exec_command
+from src.device.interaction import exec_command
 
 
 def list_difference(first, second):

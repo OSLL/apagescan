@@ -1,7 +1,7 @@
 import re
 from itertools import chain
 
-from utilities import exec_command, list_difference
+from src.utilities import exec_command, list_difference
 
 
 class DeviceHandler:
