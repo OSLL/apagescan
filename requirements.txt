@@ -3,5 +3,5 @@ pycairo
 pandas
 matplotlib
 pyinstaller
-setuptools==44.0.0
+setuptools==65.5.1
 intervaltree
